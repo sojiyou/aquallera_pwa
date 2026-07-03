@@ -1,0 +1,120 @@
+import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { db, ref, onValue } from '../services/firebase'
+
+export default function StoreDetails() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [station, setStation] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const stationRef = ref(db, `waterStations/${id}`)
+    const unsub = onValue(stationRef, (snapshot) => {
+      if (snapshot.exists()) setStation({ id, ...snapshot.val() })
+      setLoading(false)
+    })
+    return () => unsub()
+  }, [id])
+
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center bg-app-bg">
+      <span className="loading loading-spinner loading-lg text-midnight-blue"></span>
+    </div>
+  )
+
+  if (!station) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-app-bg gap-4">
+      <p className="text-midnight-blue font-bold text-xl">Station not found</p>
+      <button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button>
+    </div>
+  )
+
+  const isApproved = station.status === 'approved'
+  const isOpen = station.openNow
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const today = days[new Date().getDay()]
+
+  return (
+    <div className="min-h-screen bg-app-bg flex flex-col">
+      <div className="bg-midnight-blue text-white p-4">
+        <div className="flex items-center gap-3 mb-2">
+          <button onClick={() => navigate(-1)} className="text-white text-xl">&#x2190;</button>
+          <h1 className="text-lg font-bold truncate">{station.stationName}</h1>
+        </div>
+        <p className="text-sm ml-8">{station.address || 'Address not available'}</p>
+        <div className="flex gap-2 mt-2 ml-8">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOpen ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+            {isOpen ? 'Open' : 'Closed'}
+          </span>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isApproved ? 'bg-green-500' : 'bg-orange-500'} text-white`}>
+            {isApproved ? 'Approved' : 'Pending'}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 p-4 space-y-4">
+        <div className="card">
+          <h2 className="font-bold text-midnight-blue mb-2">⏰ Business Hours</h2>
+          {station.businessHours && Object.entries(station.businessHours).map(([day, hours]) => (
+            <div key={day} className="flex justify-between text-sm py-0.5">
+              <span className="text-gray-600">{day}</span>
+              <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{hours}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <h2 className="font-bold text-midnight-blue mb-2">🛒 Offered Services</h2>
+          {(station.offered_services && station.offered_services.length) > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {station.offered_services.map((s) => (
+                <span key={s} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{s}</span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-xs">No services listed</p>
+          )}
+        </div>
+
+        <div className="card">
+          <h2 className="font-bold text-midnight-blue mb-2">💲 Price List</h2>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-order-list rounded-lg p-2 text-center">
+              <p className="text-xs text-gray-600">Pure (Gallon)</p>
+              <p className="text-midnight-blue font-bold">₱{(station.pricing_gallon_pure || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-order-list rounded-lg p-2 text-center">
+              <p className="text-xs text-gray-600">Spring (Liter)</p>
+              <p className="text-midnight-blue font-bold">₱{(station.pricing_liter_spring || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-order-list rounded-lg p-2 text-center">
+              <p className="text-xs text-gray-600">Mineral (Gallon)</p>
+              <p className="text-midnight-blue font-bold">₱{(station.pricing_gallon_mineral || 0).toFixed(2)}</p>
+            </div>
+          </div>
+        </div>
+
+        {station.about && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">📝 About</h2>
+            <p className="text-sm text-gray-600">{station.about}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 flex gap-3">
+        <button onClick={() => navigate(-1)} className="btn-secondary flex-1">Return</button>
+        <button
+          onClick={() => {
+            if (!isApproved) { alert('This station is not yet accepting orders'); return }
+            navigate(`/create-order/${station.id}`)
+          }}
+          className={`btn-primary flex-1 ${!isApproved ? 'opacity-50' : ''}`}
+        >
+          Order Now
+        </button>
+      </div>
+    </div>
+  )
+}
