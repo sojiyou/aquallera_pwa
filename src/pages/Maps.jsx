@@ -1,52 +1,115 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
 import BottomNav from '../components/BottomNav'
 import WaterStationCard from '../components/WaterStationCard'
 import HowToOrderDialog from '../components/HowToOrderDialog'
 import { db, ref, onValue } from '../services/firebase'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
-const BAGUIO_CENTER = [120.5931, 16.4164]
+const BURNHAM_CENTER = [120.593, 16.412]
+const BAGUIO_BOUNDS = [
+  [120.52, 16.36],
+  [120.67, 16.46],
+]
+const MIN_ZOOM = 11
+const MAX_ZOOM = 18
 
 export default function Maps() {
   const navigate = useNavigate()
   const mapContainer = useRef(null)
   const map = useRef(null)
   const markersRef = useRef([])
+  const markerElsRef = useRef([])
+  const userMarkerRef = useRef(null)
+  const userMarkerElRef = useRef(null)
 
+  const [mapReady, setMapReady] = useState(false)
+  const [mapZoom, setMapZoom] = useState(MIN_ZOOM)
   const [stations, setStations] = useState([])
   const [userLocation, setUserLocation] = useState(null)
   const [selectedStation, setSelectedStation] = useState(null)
   const [showHowToOrder, setShowHowToOrder] = useState(false)
 
   useEffect(() => {
+    const handleResize = () => map.current?.resize()
+    let observer
     if (!map.current && mapContainer.current) {
       mapboxgl.accessToken = MAPBOX_TOKEN
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: BAGUIO_CENTER,
-        zoom: 11,
+        center: BURNHAM_CENTER,
+        zoom: MIN_ZOOM,
+        maxBounds: BAGUIO_BOUNDS,
       })
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-left')
+      map.current.on('load', () => {
+        map.current.resize()
+        setMapReady(true)
+        setMapZoom(map.current.getZoom())
+      })
+      map.current.on('zoom', () => setMapZoom(map.current.getZoom()))
+      window.addEventListener('resize', handleResize)
+      observer = new ResizeObserver(handleResize)
+      observer.observe(mapContainer.current)
     }
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      observer?.disconnect()
+      markersRef.current.forEach((m) => m.remove())
+      markersRef.current = []
+      markerElsRef.current = []
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove()
+        userMarkerRef.current = null
+        userMarkerElRef.current = null
+      }
+      if (map.current) {
+        map.current.remove()
+        map.current = null
+      }
+    }
+  }, [])
+
+  const getUserMarkerSize = (zoom) => Math.max(14, Math.min(44, 18 + (zoom - 10) * 3))
+
+  useEffect(() => {
+    if (!map.current || !mapReady) return
+    let flyTimer
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           setUserLocation(loc)
-          new mapboxgl.Marker({ color: '#4285F4' })
+
+          if (userMarkerRef.current) {
+            userMarkerRef.current.remove()
+          }
+
+          const size = getUserMarkerSize(mapZoom)
+          const el = document.createElement('div')
+          el.style.width = size + 'px'
+          el.style.height = size + 'px'
+          el.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:#4285F4;border:2px solid #fff;box-shadow:0 0 0 rgba(66,133,244,0.4);animation:user-pulse 1.5s infinite"/><div style="position:absolute;top:50%;left:50%;width:${size * 0.35}px;height:${size * 0.35}px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;opacity:0.6"/>`
+          userMarkerElRef.current = el
+          userMarkerRef.current = new mapboxgl.Marker({ element: el })
             .setLngLat([loc.lng, loc.lat])
-            .setPopup(new mapboxgl.Popup().setText('You are here'))
             .addTo(map.current)
+
+          flyTimer = setTimeout(() => {
+            if (map.current) {
+              map.current.flyTo({ center: [loc.lng, loc.lat], zoom: 14 })
+            }
+          }, 2000)
         },
         () => {},
         { enableHighAccuracy: true, timeout: 10000 }
       )
     }
-    return () => { markersRef.current.forEach((m) => m.remove()); markersRef.current = [] }
-  }, [])
+    return () => clearTimeout(flyTimer)
+  }, [mapReady])
 
   useEffect(() => {
     const stationsRef = ref(db, 'waterStations')
@@ -63,15 +126,28 @@ export default function Maps() {
     return () => unsub()
   }, [])
 
+  const getMarkerSize = (zoom) => Math.max(16, Math.min(48, 20 + (zoom - 10) * 4))
+
   useEffect(() => {
     if (!map.current) return
+    if (!mapReady) return
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = []
+    markerElsRef.current = []
+    const size = getMarkerSize(mapZoom)
     stations.forEach((s) => {
       if (!s.latitude || !s.longitude) return
       const el = document.createElement('div')
-      el.className = 'w-8 h-8 bg-midnight-blue rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md cursor-pointer'
-      el.innerHTML = '💧'
+      el.className = 'cursor-pointer'
+      el.style.width = size + 'px'
+      el.style.height = size + 'px'
+      el.style.transition = 'width 0.15s, height 0.15s'
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 48 48">
+        <path fill="#33000000" d="M24,46 C18,46 14,43.5 14,44.5 C14,45.3 18.5,47 24,47 C29.5,47 34,45.3 34,44.5 C34,43.5 30,46 24,46Z"/>
+        <path fill="#191970" d="M24,4 C24,4 10,18 10,28 C10,35.7 16.3,42 24,42 C31.7,42 38,35.7 38,28 C38,18 24,4 24,4Z"/>
+        <path fill="#FFFFFF" d="M20,17 A5,5 0 1,1 20,27 A5,5 0 1,1 20,17 Z"/>
+        <path fill="#CCDDFF" d="M21.5,18.5 A2,2 0 1,1 21.5,22.5 A2,2 0 1,1 21.5,18.5 Z"/>
+      </svg>`
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([s.longitude, s.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${s.stationName}</strong><br/>${s.address || ''}`))
@@ -81,8 +157,27 @@ export default function Maps() {
         map.current.flyTo({ center: [s.longitude, s.latitude], zoom: 15 })
       })
       markersRef.current.push(marker)
+      markerElsRef.current.push(el)
     })
-  }, [stations])
+  }, [stations, mapReady])
+
+  useEffect(() => {
+    if (!markerElsRef.current.length) return
+    const size = getMarkerSize(mapZoom)
+    markerElsRef.current.forEach((el) => {
+      el.style.width = size + 'px'
+      el.style.height = size + 'px'
+      el.querySelector('svg')?.setAttribute('width', size)
+      el.querySelector('svg')?.setAttribute('height', size)
+    })
+  }, [mapZoom])
+
+  useEffect(() => {
+    if (!userMarkerElRef.current) return
+    const size = getUserMarkerSize(mapZoom)
+    userMarkerElRef.current.style.width = size + 'px'
+    userMarkerElRef.current.style.height = size + 'px'
+  }, [mapZoom])
 
   const handleViewOnMap = useCallback((station) => {
     setSelectedStation(station)
@@ -104,7 +199,7 @@ export default function Maps() {
       <div className="flex-1 flex flex-col px-3 gap-2 pb-2 overflow-hidden">
         <div className="bg-midnight-blue rounded-lg p-2">
           <h2 className="text-white font-bold text-sm mb-1">📍 Water Stations Near You</h2>
-          <div ref={mapContainer} className="h-[200px] rounded-lg bg-gray-300" />
+          <div ref={mapContainer} className="h-[200px] rounded-lg bg-gray-300 overflow-hidden" />
           {selectedStation && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-white text-sm flex-1 truncate">{selectedStation.stationName}</span>

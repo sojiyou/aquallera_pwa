@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { db, ref, onValue } from '../services/firebase'
+import { to12Hour } from '../utils/formatTime'
 
 export default function StoreDetails() {
   const { id } = useParams()
@@ -59,19 +60,30 @@ export default function StoreDetails() {
           {station.businessHours && Object.entries(station.businessHours).map(([day, hours]) => (
             <div key={day} className="flex justify-between text-sm py-0.5">
               <span className="text-gray-600">{day}</span>
-              <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{hours}</span>
+              <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{to12Hour(hours)}</span>
             </div>
           ))}
         </div>
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">🛒 Offered Services</h2>
-          {(station.offered_services && station.offered_services.length) > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {station.offered_services.map((s) => (
-                <span key={s} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{s}</span>
-              ))}
-            </div>
+          {(station.serviceTypes && station.serviceTypes.length) > 0 ? (
+            <>
+              <p className="text-xs text-gray-500 mb-2">
+                {station.serviceTypes.includes('delivery') && station.serviceTypes.includes('pickup')
+                  ? 'Pickup & Delivery'
+                  : station.serviceTypes.includes('delivery')
+                    ? 'Delivery Only'
+                    : station.serviceTypes.includes('pickup')
+                      ? 'Pickup Only'
+                      : ''}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {station.serviceTypes.map((s) => (
+                  <span key={s} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{s.charAt(0).toUpperCase() + s.slice(1)}</span>
+                ))}
+              </div>
+            </>
           ) : (
             <p className="text-gray-500 text-xs">No services listed</p>
           )}

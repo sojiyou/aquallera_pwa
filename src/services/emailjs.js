@@ -1,3 +1,5 @@
+import { to12Hour } from '../utils/formatTime'
+
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
 const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
@@ -17,7 +19,7 @@ export async function sendOrderConfirmationEmail(orderData) {
           station_name: orderData.stationName,
           order_type: orderData.orderType,
           order_date: orderData.date,
-          order_time: orderData.time,
+          order_time: to12Hour(orderData.time),
           reference_number: orderData.referenceNumber,
           total: orderData.grandTotal,
           status: orderData.status,

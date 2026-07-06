@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { to12Hour } from '../utils/formatTime'
 import { db, ref, onValue, get, child } from '../services/firebase'
 
 export default function CreateOrder() {
@@ -12,8 +13,7 @@ export default function CreateOrder() {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [orderType, setOrderType] = useState('Delivery')
-  const [waterType, setWaterType] = useState('pure')
-  const [quantity, setQuantity] = useState(1)
+  const [quantities, setQuantities] = useState({ pure: 0, spring: 0, mineral: 0 })
   const [userAddress, setUserAddress] = useState('')
   const [deliveryInstructions, setDeliveryInstructions] = useState('')
   const [location, setLocation] = useState(null)
@@ -37,17 +37,34 @@ export default function CreateOrder() {
     })
   }, [user])
 
+  const availableOrderTypes = station?.serviceTypes?.length
+    ? station.serviceTypes.map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    : ['Delivery', 'Pickup']
+
+  useEffect(() => {
+    if (!station) return
+    if (station.serviceTypes?.length) {
+      if (!station.serviceTypes.includes('delivery')) setOrderType('Pickup')
+      else if (!station.serviceTypes.includes('pickup')) setOrderType('Delivery')
+    }
+  }, [station])
+
   const prices = {
     pure: station?.pricing_gallon_pure || 0,
     spring: station?.pricing_liter_spring || 0,
     mineral: station?.pricing_gallon_mineral || 0,
   }
 
-  const unitLabels = { pure: 'Gallon', spring: 'Liter', mineral: 'Gallon' }
+  const waterTypeMeta = [
+    { key: 'pure', label: 'Pure', unit: 'Gallon' },
+    { key: 'spring', label: 'Spring', unit: 'Liter' },
+    { key: 'mineral', label: 'Mineral', unit: 'Gallon' },
+  ]
   const deliveryFee = station?.pricing_delivery_fee || 50
   const transactionFee = 20
-  const subtotal = (prices[waterType] || 0) * quantity
+  const subtotal = Object.entries(prices).reduce((sum, [type, price]) => sum + (price * (quantities[type] || 0)), 0)
   const grandTotal = subtotal + (orderType === 'Delivery' ? deliveryFee : 0) + transactionFee
+  const hasItems = Object.values(quantities).some(q => q > 0)
 
   const buildOrderData = () => ({
     customerId: user.uid,
@@ -59,15 +76,15 @@ export default function CreateOrder() {
     customerPhone: userData?.number || '',
     orderType,
     status: 'pending',
-    pureWaterQty: waterType === 'pure' ? quantity : 0,
-    pureWaterPrice: waterType === 'pure' ? prices.pure : 0,
-    pureWaterTotal: waterType === 'pure' ? subtotal : 0,
-    springWaterQty: waterType === 'spring' ? quantity : 0,
-    springWaterPrice: waterType === 'spring' ? prices.spring : 0,
-    springWaterTotal: waterType === 'spring' ? subtotal : 0,
-    mineralWaterQty: waterType === 'mineral' ? quantity : 0,
-    mineralWaterPrice: waterType === 'mineral' ? prices.mineral : 0,
-    mineralWaterTotal: waterType === 'mineral' ? subtotal : 0,
+    pureWaterQty: quantities.pure || 0,
+    pureWaterPrice: prices.pure,
+    pureWaterTotal: (prices.pure || 0) * (quantities.pure || 0),
+    springWaterQty: quantities.spring || 0,
+    springWaterPrice: prices.spring,
+    springWaterTotal: (prices.spring || 0) * (quantities.spring || 0),
+    mineralWaterQty: quantities.mineral || 0,
+    mineralWaterPrice: prices.mineral,
+    mineralWaterTotal: (prices.mineral || 0) * (quantities.mineral || 0),
     waterSubtotal: subtotal,
     deliveryFee: orderType === 'Delivery' ? deliveryFee : 0,
     transactionFee,
@@ -113,12 +130,19 @@ export default function CreateOrder() {
       </div>
       <div className="flex-1 p-4 space-y-3 overflow-y-auto">
         <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🛍️ Order Summary</h2><p className="text-sm text-gray-600">Station: <strong>{station.stationName}</strong></p></div>
-        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📦 Items</h2><p className="text-sm text-gray-600 capitalize">{waterType} water - {quantity} {unitLabels[waterType]}(s) at ₱{prices[waterType].toFixed(2)} each</p></div>
+        <div className="card">
+          <h2 className="font-bold text-midnight-blue mb-2">📦 Items</h2>
+          <div className="space-y-1">
+            {waterTypeMeta.filter(t => quantities[t.key] > 0).map(t => (
+              <p key={t.key} className="text-sm text-gray-600 capitalize">{t.label} water — {quantities[t.key]} {t.unit}(s) at ₱{(prices[t.key] || 0).toFixed(2)} each</p>
+            ))}
+          </div>
+        </div>
         <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🚚 Order Type</h2><p className="text-sm text-gray-600">{orderType}</p></div>
         {orderType === 'Delivery' && location && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📍 Location</h2><p className="text-sm text-gray-600">{location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p></div>}
         {userAddress && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🏠 Address</h2><p className="text-sm text-gray-600">{userAddress}</p></div>}
         {preferredDate && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date</h2><p className="text-sm text-gray-600">{preferredDate}</p></div>}
-        {preferredTime && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">⏰ Preferred Time</h2><p className="text-sm text-gray-600">{preferredTime}</p></div>}
+        {preferredTime && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">⏰ Preferred Time</h2><p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p></div>}
         {deliveryInstructions && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📝 Instructions</h2><p className="text-sm text-gray-600">{deliveryInstructions}</p></div>}
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">💵 Payment Breakdown</h2>
@@ -149,30 +173,31 @@ export default function CreateOrder() {
         <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🏪 Station</h2><p className="text-sm text-gray-600">{station.stationName}</p></div>
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">💧 Water Type</h2>
-          <div className="flex gap-2">
-            {['pure', 'spring', 'mineral'].map((type) => (
-              <button key={type} onClick={() => { setWaterType(type); setQuantity(1) }}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium capitalize ${waterType === type ? 'bg-midnight-blue text-white' : 'bg-input-bg text-gray-600'}`}
-              >{type}</button>
+          <h2 className="font-bold text-midnight-blue mb-2">💧 Select Quantities</h2>
+          <div className="space-y-3">
+            {waterTypeMeta.map(({ key, label, unit }) => (
+              <div key={key} className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium capitalize text-midnight-blue">{label}</p>
+                  <p className="text-xs text-gray-500">₱{(prices[key] || 0).toFixed(2)} / {unit}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setQuantities(q => ({ ...q, [key]: Math.max(0, q[key] - 1) }))}
+                    className="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-lg font-bold text-midnight-blue"
+                    disabled={!quantities[key]}>-</button>
+                  <span className="text-xl font-bold text-midnight-blue w-6 text-center">{quantities[key] || 0}</span>
+                  <button onClick={() => setQuantities(q => ({ ...q, [key]: q[key] + 1 }))}
+                    className="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-lg font-bold text-midnight-blue">+</button>
+                </div>
+              </div>
             ))}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">₱{(prices[waterType] || 0).toFixed(2)} per {unitLabels[waterType]}</p>
-        </div>
-
-        <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">🔢 Quantity ({unitLabels[waterType]}s)</h2>
-          <div className="flex items-center justify-center gap-4">
-            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 rounded-full bg-input-bg flex items-center justify-center text-xl font-bold text-midnight-blue" disabled={quantity <= 1}>-</button>
-            <span className="text-3xl font-bold text-midnight-blue w-10 text-center">{quantity}</span>
-            <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 rounded-full bg-input-bg flex items-center justify-center text-xl font-bold text-midnight-blue">+</button>
           </div>
         </div>
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">🚚 Order Type</h2>
           <div className="flex gap-2">
-            {['Delivery', 'Pickup'].map((type) => (
+            {availableOrderTypes.map((type) => (
               <button key={type} onClick={() => setOrderType(type)}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium ${orderType === type ? 'bg-midnight-blue text-white' : 'bg-input-bg text-gray-600'}`}
               >{type}</button>
@@ -213,7 +238,7 @@ export default function CreateOrder() {
       </div>
 
       <div className="p-4">
-        <button onClick={() => setShowPreview(true)} className="btn-primary w-full">Preview Order</button>
+        <button onClick={() => setShowPreview(true)} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
       </div>
     </div>
   )

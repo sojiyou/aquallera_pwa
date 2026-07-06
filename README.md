@@ -44,7 +44,8 @@ aquallera-pwa/
 │   │   ├── emailjs.js        # EmailJS REST sender
 │   │   └── haversine.js      # calculateDistance, formatDistance, isWithinRange
 │   ├── utils/
-│   │   └── errors.js         # getFirebaseErrorMessage — user-friendly Firebase auth error codes
+│   │   ├── errors.js         # getFirebaseErrorMessage — user-friendly Firebase auth error codes
+│   │   └── formatTime.js     # to12Hour — converts 24h "14:30" → "2:30 PM"
 │   ├── components/
 │   │   ├── Footer.jsx        # Social links, contact info (used in Landing/Login/Signup)
 │   │   ├── BottomNav.jsx     # 3-tab nav: Map | Orders | Profile
@@ -124,7 +125,7 @@ Key fields used by the PWA:
 - `pricing_gallon_pure`, `pricing_liter_spring`, `pricing_gallon_mineral` — prices
 - `pricing_delivery_fee` — delivery fee (nullable, fallback 50)
 - `businessHours`: `{ "Monday": "8:00 AM - 5:00 PM", ... }`
-- `offered_services`: `["Delivery", "Pickup"]`
+- `serviceTypes`: `["delivery", "pickup"]` — lowercase; drives available order types in CreateOrder and displayed services in StoreDetails
 - `about`: description text
 - `openNow`: boolean
 
@@ -314,6 +315,22 @@ Custom component classes (defined in `src/index.css`):
 - This requires `.indexOn: "number"` in Firebase rules on the `users` node
 - On success, writes `{ uid, fullName, email, number, createdAt }` to `/users/{uid}`
 
+### Multi-Water-Type Ordering
+- All three water types (Pure/Gallon, Spring/Liter, Mineral/Gallon) have independent +/- counters
+- Quantities start at 0; user can order any combination (e.g. 2 Pure + 3 Spring + 1 Mineral)
+- At least one type must have qty > 0 to enable "Preview Order"
+- Subtotal sums across all types; each type's line total is stored individually in the order
+
+### Order Type Filtering
+- The available order types ("Delivery", "Pickup") are derived from the station's `serviceTypes` array in Firebase
+- Pickup-only stations only show "Pickup" (auto-selected); delivery-only only shows "Delivery"
+- Stations with both or no services set show both options (default: "Delivery")
+
+### 12-Hour Time Format
+- `src/utils/formatTime.js` provides `to12Hour()` — regex-based converter for `HH:mm` → `h:mm AM/PM`
+- Applied to order time display in preview, business hours in StoreDetails, and email template params
+- Raw `HH:mm` value is still stored in Firebase for data consistency
+
 ### Order Data Model
 - The PWA writes orders in the **same format** as the Android app (`Order.kt` data class)
 - The admin website (`Dashboard.js`) reads all orders and filters by `stationId` client-side
@@ -347,12 +364,16 @@ The admin website at `~/Desktop/Github/aquallera_web` is a separate Create React
 - Covers: `auth/email-already-in-use`, `auth/invalid-email`, `auth/weak-password`, `auth/user-not-found`, `auth/wrong-password`, `auth/invalid-credential`, `auth/too-many-requests`, `auth/network-request-failed`, `auth/internal-error`, `permission-denied`
 
 ### Maps
-- Mapbox GL JS loaded from npm package (not CDN)
-- Token: `your_mapbox_token` (see `.env`)
-- Default center: Baguio City `[120.5931, 16.4164]`, zoom 11
-- Water station markers are custom div elements (blue circle with 💧 emoji)
-- User location shown as blue marker with "You are here" popup
-- Station markers have click handlers that fly to the station and select it
+- Mapbox GL JS loaded from npm package (not CDN) — CSS imported directly in the component
+- Token: `VITE_MAPBOX_TOKEN` (see `.env`)
+- Default center: Burnham Park, Baguio `[120.593, 16.412]`, zoom 11
+- Viewport constrained to Baguio City bounds (`[[120.52, 16.36], [120.67, 16.46]]`)
+- Water station markers are custom SVG pins (midnight blue drop shape, scales with zoom)
+- Station markers have click handlers that fly to the station and select it (shows name + "View Details")
+- User location: **pulsing marker** (animated ring, blue dot with white center, scales with zoom)
+- On load: map shows Burnham Park → geolocation resolves → pulsing marker appears at user's location → after **2 second delay**, smoothly flies to user at zoom 14
+- ResizeObserver on the map container keeps the map sized correctly after layout shifts
+- Window resize listener + `map.resize()` on 'load' event for responsive sizing
 - Mapbox NavigationControl added to top-left
 
 ### WaterStationCard Distance
@@ -431,5 +452,4 @@ The admin website is at `~/Desktop/Github/aquallera_web`. Key files:
 3. **Order detail view** — Clicking an order in the Orders list doesn't open a detail view (currently only displays summary via OrderTicketItem)
 4. **PWA icons** — The Android drawable logo files are copied but the `icons/icon-192x192.png` and `icons/icon-512x512.png` need to be generated/resized from the logo
 5. **Offline support** — The PWA service worker precaches assets but no offline fallback pages are implemented
-6. **Mapbox fallback** — Currently only Mapbox GL JS is configured; Leaflet fallback from `package.json` (react-leaflet, leaflet) is installed as a dependency but not imported anywhere
-7. **API key is hardcoded in .env** — Should be kept secure and not committed to git
+6. **API key is hardcoded in .env** — Should be kept secure and not committed to git
