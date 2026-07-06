@@ -22,6 +22,7 @@ export default function Maps() {
   const map = useRef(null)
   const markersRef = useRef([])
   const markerElsRef = useRef([])
+  const labelElsRef = useRef([])
   const userMarkerRef = useRef(null)
   const userMarkerElRef = useRef(null)
 
@@ -40,11 +41,11 @@ export default function Maps() {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v12',
+        attributionControl: false,
         center: BURNHAM_CENTER,
         zoom: MIN_ZOOM,
         maxBounds: BAGUIO_BOUNDS,
       })
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-left')
       map.current.on('load', () => {
         map.current.resize()
         setMapReady(true)
@@ -61,6 +62,7 @@ export default function Maps() {
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
       markerElsRef.current = []
+      labelElsRef.current = []
       if (userMarkerRef.current) {
         userMarkerRef.current.remove()
         userMarkerRef.current = null
@@ -107,10 +109,7 @@ export default function Maps() {
     )
   }, [mapZoom])
 
-  useEffect(() => {
-    if (!map.current || !mapReady) return
-    requestUserLocation()
-  }, [mapReady, requestUserLocation])
+
 
   useEffect(() => {
     const stationsRef = ref(db, 'waterStations')
@@ -127,7 +126,9 @@ export default function Maps() {
     return () => unsub()
   }, [])
 
+  const LABEL_MIN_ZOOM = 13
   const getMarkerSize = (zoom) => Math.max(16, Math.min(48, 20 + (zoom - 10) * 4))
+  const getLabelFontSize = (zoom) => zoom < LABEL_MIN_ZOOM ? 0 : Math.max(10, Math.min(16, 8 + (zoom - LABEL_MIN_ZOOM) * 1.5))
 
   useEffect(() => {
     if (!map.current) return
@@ -135,41 +136,75 @@ export default function Maps() {
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = []
     markerElsRef.current = []
+    labelElsRef.current = []
     const size = getMarkerSize(mapZoom)
+    const labelFontSize = getLabelFontSize(mapZoom)
     stations.forEach((s) => {
       if (!s.latitude || !s.longitude) return
-      const el = document.createElement('div')
-      el.className = 'cursor-pointer'
-      el.style.width = size + 'px'
-      el.style.height = size + 'px'
-      el.style.transition = 'width 0.15s, height 0.15s'
-      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 48 48">
+
+      const wrapper = document.createElement('div')
+      wrapper.className = 'cursor-pointer'
+      wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;'
+
+      const label = document.createElement('span')
+      label.textContent = s.stationName
+      label.style.cssText = `
+        font-size:${Math.max(0, labelFontSize)}px;
+        line-height:1.1;
+        font-weight:600;
+        color:#191970;
+        text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;
+        white-space:nowrap;
+        pointer-events:none;
+        transition:font-size 0.15s, opacity 0.15s;
+        opacity:${labelFontSize > 0 ? 1 : 0};
+        max-width:120px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        text-align:center;
+      `
+
+      const icon = document.createElement('div')
+      icon.style.width = size + 'px'
+      icon.style.height = size + 'px'
+      icon.style.transition = 'width 0.15s, height 0.15s'
+      icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 48 48">
         <path fill="#33000000" d="M24,46 C18,46 14,43.5 14,44.5 C14,45.3 18.5,47 24,47 C29.5,47 34,45.3 34,44.5 C34,43.5 30,46 24,46Z"/>
         <path fill="#191970" d="M24,4 C24,4 10,18 10,28 C10,35.7 16.3,42 24,42 C31.7,42 38,35.7 38,28 C38,18 24,4 24,4Z"/>
         <path fill="#FFFFFF" d="M20,17 A5,5 0 1,1 20,27 A5,5 0 1,1 20,17 Z"/>
         <path fill="#CCDDFF" d="M21.5,18.5 A2,2 0 1,1 21.5,22.5 A2,2 0 1,1 21.5,18.5 Z"/>
       </svg>`
-      const marker = new mapboxgl.Marker({ element: el })
+
+      wrapper.appendChild(label)
+      wrapper.appendChild(icon)
+
+      const marker = new mapboxgl.Marker({ element: wrapper })
         .setLngLat([s.longitude, s.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${s.stationName}</strong><br/>${s.address || ''}`))
         .addTo(map.current)
-      el.addEventListener('click', () => {
+      wrapper.addEventListener('click', () => {
         setSelectedStation(s)
         map.current.flyTo({ center: [s.longitude, s.latitude], zoom: 15 })
       })
       markersRef.current.push(marker)
-      markerElsRef.current.push(el)
+      markerElsRef.current.push(icon)
+      labelElsRef.current.push(label)
     })
   }, [stations, mapReady])
 
   useEffect(() => {
     if (!markerElsRef.current.length) return
     const size = getMarkerSize(mapZoom)
+    const labelFontSize = getLabelFontSize(mapZoom)
     markerElsRef.current.forEach((el) => {
       el.style.width = size + 'px'
       el.style.height = size + 'px'
       el.querySelector('svg')?.setAttribute('width', size)
       el.querySelector('svg')?.setAttribute('height', size)
+    })
+    labelElsRef.current.forEach((label) => {
+      label.style.fontSize = Math.max(0, labelFontSize) + 'px'
+      label.style.opacity = labelFontSize > 0 ? 1 : 0
     })
   }, [mapZoom])
 

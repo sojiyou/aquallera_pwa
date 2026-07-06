@@ -45,7 +45,7 @@ export default function OrderReceipt({ order }) {
         )}
         <div className="flex justify-between">
           <span className="text-gray-500">Transaction Fee</span>
-          <span className="text-gray-700">₱{(order.transactionFee || order.transaction_fee || 20).toFixed(2)}</span>
+          <span className="text-gray-700">₱{(order.transactionFee || order.transaction_fee || 5).toFixed(2)}</span>
         </div>
       </div>
 
