@@ -4,14 +4,15 @@ import { formatDistance } from '../services/haversine'
 export default function WaterStationCard({ station, userLocation, onViewOnMap }) {
   const navigate = useNavigate()
   const isApproved = station.status === 'approved'
+  const isOnline = station.online || station.isOnline
   const dist = userLocation && station.latitude && station.longitude
     ? formatDistance(calculateDistance(userLocation.lat, userLocation.lng, station.latitude, station.longitude))
     : null
 
   let statusText = '● Pending Approval'
   let statusColor = 'text-red-600'
-  if (isApproved && station.online) { statusText = '● Online'; statusColor = 'text-green-600' }
-  else if (isApproved && !station.online) { statusText = '● Offline'; statusColor = 'text-orange-500' }
+  if (isApproved && isOnline) { statusText = '● Online'; statusColor = 'text-green-600' }
+  else if (isApproved && !isOnline) { statusText = '● Offline'; statusColor = 'text-orange-500' }
 
   return (
     <div className="card mx-0 mb-3">
@@ -31,7 +32,7 @@ export default function WaterStationCard({ station, userLocation, onViewOnMap })
       </div>
       <div className="bg-order-list rounded-lg px-3 py-2 flex flex-wrap gap-x-3 gap-y-1 text-xs mb-3">
         <span className="text-gray-600">Pure: <strong className="text-midnight-blue">₱{(station.pricing_gallon_pure || 0).toFixed(2)}</strong></span>
-        <span className="text-gray-600">Spring: <strong className="text-midnight-blue">₱{(station.pricing_liter_spring || 0).toFixed(2)}</strong></span>
+        <span className="text-gray-600">Spring: <strong className="text-midnight-blue">₱{(station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0).toFixed(2)}</strong></span>
         <span className="text-gray-600">Mineral: <strong className="text-midnight-blue">₱{(station.pricing_gallon_mineral || 0).toFixed(2)}</strong></span>
       </div>
       <div className="flex justify-end gap-3">

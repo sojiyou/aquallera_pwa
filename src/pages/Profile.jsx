@@ -51,7 +51,7 @@ export default function Profile() {
           <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">✏️ Edit Profile</button>
           <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">🗺️ View Maps</button>
           <button onClick={() => navigate('/orders')} className="btn-primary w-full text-left px-4">📋 View Orders</button>
-          <button onClick={() => navigate('/home')} className="btn-primary w-full text-left px-4">🏠 Home</button>
+          <button onClick={() => navigate('/home')} className="btn-primary w-full text-left px-4">🏠 About Aqullera</button>
           <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg font-medium text-left px-4">🚪 Log Out</button>
         </div>
       </div>

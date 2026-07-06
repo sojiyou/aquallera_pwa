@@ -51,6 +51,7 @@ aquallera-pwa/
 │   │   ├── BottomNav.jsx     # 3-tab nav: Map | Orders | Profile
 │   │   ├── WaterStationCard.jsx  # Station card with status, pricing, distance, actions
 │   │   ├── OrderTicketItem.jsx   # Order list item with status badge, ref#, total
+│   │   ├── OrderReceipt.jsx      # Shared receipt-style order detail component
 │   │   └── HowToOrderDialog.jsx  # 5-step modal dialog
 │   └── pages/
 │       ├── Splash.jsx        # Auth-aware redirect (1.5s → /maps or /main)
@@ -58,13 +59,13 @@ aquallera-pwa/
 │       ├── Login.jsx         # signInWithEmailAndPassword + user-friendly errors
 │       ├── Signup.jsx        # Duplicate phone check (orderByChild), createUser, write to /users
 │       ├── Home.jsx          # "Why Aqua-llera" info pages + BottomNav
-│       ├── Maps.jsx          # Mapbox map + station markers + user location + station list
-│       ├── StoreDetails.jsx  # Station details: hours, services, prices, about
-│       ├── CreateOrder.jsx   # Water type + quantity + Delivery/Pickup + date/time + GPS
-│       ├── OrderConfirmation.jsx  # Summary + payment breakdown + save to Firebase + email
+│       ├── Maps.jsx          # Mapbox map + station markers + user location button + station list
+│       ├── StoreDetails.jsx  # Station details: hours, delivery hours, services, prices, about
+│       ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + delivery time slots
+│       ├── OrderConfirmation.jsx  # Receipt-style confirm + save to Firebase + email
 │       ├── OrderSuccess.jsx  # Success page with order details
-│       ├── Orders.jsx        # User's orders list (filtered by userId) + BottomNav
-│       ├── Profile.jsx       # Avatar, account details, edit/logout/maps/orders/home
+│       ├── Orders.jsx        # User's orders list — tap card to see receipt detail
+│       ├── Profile.jsx       # Avatar, account details, edit/logout/maps/orders/about
 │       └── EditProfile.jsx   # Edit name/email/phone → writes to /users/{uid}
 ```
 
@@ -122,10 +123,12 @@ Key fields used by the PWA:
 - `stationName`, `address`, `latitude`, `longitude`
 - `status`: `"pending"` | `"approved"` | `"rejected"`
 - `online`: boolean (set by station owner's dashboard)
-- `pricing_gallon_pure`, `pricing_liter_spring`, `pricing_gallon_mineral` — prices
+- `isOnline`: boolean (auto-presence flag — set on dashboard login via `onDisconnect`)
+- `pricing_gallon_pure`, `pricing_liter_spring` / `pricing_gallon_spring`, `pricing_gallon_mineral` — prices
 - `pricing_delivery_fee` — delivery fee (nullable, fallback 50)
 - `businessHours`: `{ "Monday": "8:00 AM - 5:00 PM", ... }`
 - `serviceTypes`: `["delivery", "pickup"]` — lowercase; drives available order types in CreateOrder and displayed services in StoreDetails
+- `deliveryHours`: `["08:00", "09:00", "10:00", ...]` — array of HH:mm delivery time slots
 - `about`: description text
 - `openNow`: boolean
 
@@ -449,7 +452,6 @@ The admin website is at `~/Desktop/Github/aquallera_web`. Key files:
 
 1. **Firebase rules** — Add `.indexOn: "number"` to `users` node for signup duplicate phone check
 2. **orderCounter cleanup** — The `orderCounter` node may need periodic cleanup for old dates
-3. **Order detail view** — Clicking an order in the Orders list doesn't open a detail view (currently only displays summary via OrderTicketItem)
-4. **PWA icons** — The Android drawable logo files are copied but the `icons/icon-192x192.png` and `icons/icon-512x512.png` need to be generated/resized from the logo
-5. **Offline support** — The PWA service worker precaches assets but no offline fallback pages are implemented
-6. **API key is hardcoded in .env** — Should be kept secure and not committed to git
+3. **PWA icons** — The Android drawable logo files are copied but the `icons/icon-192x192.png` and `icons/icon-512x512.png` need to be generated/resized from the logo
+4. **Offline support** — The PWA service worker precaches assets but no offline fallback pages are implemented
+5. **API key is hardcoded in .env** — Should be kept secure and not committed to git

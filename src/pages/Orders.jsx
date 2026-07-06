@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import OrderTicketItem from '../components/OrderTicketItem'
+import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
 import { db, ref, onValue } from '../services/firebase'
 
@@ -10,6 +11,7 @@ export default function Orders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -31,6 +33,18 @@ export default function Orders() {
     return () => unsub()
   }, [user])
 
+  if (selectedOrder) return (
+    <div className="min-h-screen bg-app-bg flex flex-col">
+      <div className="p-4 flex items-center gap-3 border-b border-gray-200">
+        <button onClick={() => setSelectedOrder(null)} className="text-midnight-blue text-xl">&#x2190;</button>
+        <h1 className="text-midnight-blue font-bold text-lg">Order Details</h1>
+      </div>
+      <div className="flex-1 p-4 overflow-y-auto">
+        <OrderReceipt order={selectedOrder} />
+      </div>
+    </div>
+  )
+
   return (
     <div className="h-screen flex flex-col bg-app-bg">
       <div className="bg-midnight-blue text-white p-4 flex items-center gap-3 shrink-0">
@@ -48,7 +62,9 @@ export default function Orders() {
             <button onClick={() => navigate('/maps')} className="btn-primary">Find Water Stations</button>
           </div>
         ) : (
-          orders.map((order) => <OrderTicketItem key={order.firebaseKey} order={order} />)
+          orders.map((order) => (
+            <OrderTicketItem key={order.firebaseKey} order={order} onClick={() => setSelectedOrder(order)} />
+          ))
         )}
       </div>
       <BottomNav />

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
 import { db, ref, onValue, get, child } from '../services/firebase'
+
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
 export default function CreateOrder() {
   const { id } = useParams()
@@ -20,6 +22,10 @@ export default function CreateOrder() {
   const [preferredDate, setPreferredDate] = useState('')
   const [preferredTime, setPreferredTime] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [addressSearch, setAddressSearch] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const searchContainerRef = useRef(null)
 
   useEffect(() => {
     const stationRef = ref(db, `waterStations/${id}`)
@@ -51,13 +57,13 @@ export default function CreateOrder() {
 
   const prices = {
     pure: station?.pricing_gallon_pure || 0,
-    spring: station?.pricing_liter_spring || 0,
+    spring: station?.pricing_liter_spring ?? station?.pricing_gallon_spring ?? 0,
     mineral: station?.pricing_gallon_mineral || 0,
   }
 
   const waterTypeMeta = [
     { key: 'pure', label: 'Pure', unit: 'Gallon' },
-    { key: 'spring', label: 'Spring', unit: 'Liter' },
+    { key: 'spring', label: 'Spring', unit: 'Gallon' },
     { key: 'mineral', label: 'Mineral', unit: 'Gallon' },
   ]
   const deliveryFee = station?.pricing_delivery_fee || 50
@@ -102,17 +108,105 @@ export default function CreateOrder() {
     updatedAt: new Date().toISOString(),
   })
 
+  const reverseGeocode = useCallback(async (lat, lng) => {
+    try {
+      if (!MAPBOX_TOKEN) return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&limit=1`
+      )
+      const data = await res.json()
+      if (data.features?.length) return data.features[0].place_name
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+    } catch {
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+    }
+  }, [])
+
+  const searchAddress = useCallback(async (query) => {
+    if (!query.trim()) { setSuggestions([]); return }
+    setIsSearching(true)
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
+        `access_token=${MAPBOX_TOKEN}&country=PH&types=address,place,poi,locality,neighborhood,district&` +
+        `language=en&limit=8&autocomplete=true&fuzzyMatch=true`
+      )
+      const data = await res.json()
+      setSuggestions(data.features || [])
+    } catch { setSuggestions([]) }
+    finally { setIsSearching(false) }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (addressSearch && !location) searchAddress(addressSearch)
+      else if (!addressSearch) setSuggestions([])
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [addressSearch, location, searchAddress])
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setSuggestions([])
+      }
+    }
+    if (suggestions.length) document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [suggestions])
+
+  const selectSuggestion = (result) => {
+    const [lng, lat] = result.center
+    setLocation({ lat, lng })
+    setAddressSearch(result.place_name)
+    setUserAddress(result.place_name)
+    setSuggestions([])
+  }
+
+  const handleAddressChange = (e) => {
+    const val = e.target.value
+    setAddressSearch(val)
+    setUserAddress(val)
+    if (!val || !location) setSuggestions([])
+    if (!val && location) {
+      setLocation(null)
+      setSuggestions([])
+    }
+  }
+
+  const clearAddress = () => {
+    setAddressSearch('')
+    setUserAddress('')
+    setLocation(null)
+    setSuggestions([])
+  }
+
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser')
       return
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        alert('Location captured successfully!')
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setLocation({ lat, lng })
+        const address = await reverseGeocode(lat, lng)
+        setAddressSearch(address)
+        setUserAddress(address)
+        setSuggestions([])
       },
-      () => alert('Unable to retrieve your location. Please check your GPS settings.'),
+      (err) => {
+        if (err.code === 1) {
+          alert('Location access was denied. Please enable location permissions in your browser settings and try again.')
+        } else if (err.code === 2) {
+          alert('Unable to retrieve your location. Please check your GPS settings and try again.')
+        } else if (err.code === 3) {
+          alert('Location request timed out. Please try again in an open area.')
+        } else {
+          alert('Unable to retrieve your location. Please check your GPS settings.')
+        }
+      },
       { enableHighAccuracy: true, timeout: 10000 }
     )
   }
@@ -139,8 +233,7 @@ export default function CreateOrder() {
           </div>
         </div>
         <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🚚 Order Type</h2><p className="text-sm text-gray-600">{orderType}</p></div>
-        {orderType === 'Delivery' && location && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📍 Location</h2><p className="text-sm text-gray-600">{location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p></div>}
-        {userAddress && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🏠 Address</h2><p className="text-sm text-gray-600">{userAddress}</p></div>}
+        {userAddress && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📍 Delivery Address</h2><p className="text-sm text-gray-600">{userAddress}</p></div>}
         {preferredDate && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date</h2><p className="text-sm text-gray-600">{preferredDate}</p></div>}
         {preferredTime && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">⏰ Preferred Time</h2><p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p></div>}
         {deliveryInstructions && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📝 Instructions</h2><p className="text-sm text-gray-600">{deliveryInstructions}</p></div>}
@@ -206,29 +299,83 @@ export default function CreateOrder() {
         </div>
 
         {orderType === 'Delivery' && (
-          <>
-            <div className="card">
-              <h2 className="font-bold text-midnight-blue mb-2">📍 Your Location</h2>
-              <button onClick={handleGetLocation}
-                className={`w-full py-2 rounded-lg text-sm font-medium ${location ? 'bg-green-500 text-white' : 'bg-input-bg text-gray-600'}`}
-              >{location ? '✓ Location Captured' : '📍 Get Current Location'}</button>
-              {location && <p className="text-xs text-gray-500 mt-1">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</p>}
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">📍 Delivery Address</h2>
+            <div className="relative" ref={searchContainerRef}>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={addressSearch}
+                    onChange={handleAddressChange}
+                    placeholder="Type your address or use GPS..."
+                    className="input-field w-full pr-8"
+                  />
+                  {addressSearch && (
+                    <button
+                      type="button"
+                      onClick={clearAddress}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm leading-none"
+                    >✕</button>
+                  )}
+                </div>
+                <button
+                  onClick={handleGetLocation}
+                  className="px-3 py-2 rounded-lg bg-midnight-blue text-white text-sm shrink-0"
+                  title="Get current location"
+                >📍</button>
+              </div>
+              {isSearching && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 p-2">
+                  <span className="w-4 h-4 border-2 border-midnight-blue border-t-transparent rounded-full animate-spin" />
+                  Searching...
+                </div>
+              )}
+              {suggestions.length > 0 && !location && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 max-h-[200px] overflow-y-auto z-50 shadow-lg">
+                  {suggestions.map((result, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      onClick={() => selectSuggestion(result)}
+                    >
+                      <span className="text-sm mr-2">📍</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-800 truncate">{result.text}</div>
+                        <div className="text-xs text-gray-500 truncate">{result.place_name}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="card">
-              <h2 className="font-bold text-midnight-blue mb-2">🏠 Delivery Address</h2>
-              <textarea value={userAddress} onChange={(e) => setUserAddress(e.target.value)}
-                placeholder="Enter your delivery address" className="input-field min-h-[80px]" />
-            </div>
-          </>
+          </div>
         )}
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date & Time</h2>
-          <div className="flex gap-2">
-            <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} min={today} className="input-field flex-1" />
-            <input type="time" value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)} className="input-field flex-1" />
-          </div>
+          <h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date</h2>
+          <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} min={today} className="input-field w-full" />
         </div>
+
+        {preferredDate && orderType === 'Delivery' && station?.deliveryHours?.length > 0 && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">🚚 Delivery Time</h2>
+            <p className="text-xs text-gray-500 mb-2">Select a delivery time slot</p>
+            <div className="flex flex-wrap gap-2">
+              {station.deliveryHours.map((time) => (
+                <button
+                  key={time}
+                  onClick={() => setPreferredTime(time)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    preferredTime === time
+                      ? 'bg-midnight-blue text-white'
+                      : 'bg-input-bg text-gray-600 hover:bg-gray-200'
+                  }`}
+                >{to12Hour(time)}</button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">📝 Additional Details</h2>

@@ -75,41 +75,42 @@ export default function Maps() {
 
   const getUserMarkerSize = (zoom) => Math.max(14, Math.min(44, 18 + (zoom - 10) * 3))
 
+  const requestUserLocation = useCallback(() => {
+    if (!navigator.geolocation || !map.current) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        setUserLocation(loc)
+
+        if (userMarkerRef.current) {
+          userMarkerRef.current.remove()
+        }
+
+        const size = getUserMarkerSize(mapZoom)
+        const el = document.createElement('div')
+        el.style.width = size + 'px'
+        el.style.height = size + 'px'
+        el.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:#4285F4;border:2px solid #fff;box-shadow:0 0 0 rgba(66,133,244,0.4);animation:user-pulse 1.5s infinite"/><div style="position:absolute;top:50%;left:50%;width:${size * 0.35}px;height:${size * 0.35}px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;opacity:0.6"/>`
+        userMarkerElRef.current = el
+        userMarkerRef.current = new mapboxgl.Marker({ element: el })
+          .setLngLat([loc.lng, loc.lat])
+          .addTo(map.current)
+
+        setTimeout(() => {
+          if (map.current) {
+            map.current.flyTo({ center: [loc.lng, loc.lat], zoom: 14 })
+          }
+        }, 2000)
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }, [mapZoom])
+
   useEffect(() => {
     if (!map.current || !mapReady) return
-    let flyTimer
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-          setUserLocation(loc)
-
-          if (userMarkerRef.current) {
-            userMarkerRef.current.remove()
-          }
-
-          const size = getUserMarkerSize(mapZoom)
-          const el = document.createElement('div')
-          el.style.width = size + 'px'
-          el.style.height = size + 'px'
-          el.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:#4285F4;border:2px solid #fff;box-shadow:0 0 0 rgba(66,133,244,0.4);animation:user-pulse 1.5s infinite"/><div style="position:absolute;top:50%;left:50%;width:${size * 0.35}px;height:${size * 0.35}px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;opacity:0.6"/>`
-          userMarkerElRef.current = el
-          userMarkerRef.current = new mapboxgl.Marker({ element: el })
-            .setLngLat([loc.lng, loc.lat])
-            .addTo(map.current)
-
-          flyTimer = setTimeout(() => {
-            if (map.current) {
-              map.current.flyTo({ center: [loc.lng, loc.lat], zoom: 14 })
-            }
-          }, 2000)
-        },
-        () => {},
-        { enableHighAccuracy: true, timeout: 10000 }
-      )
-    }
-    return () => clearTimeout(flyTimer)
-  }, [mapReady])
+    requestUserLocation()
+  }, [mapReady, requestUserLocation])
 
   useEffect(() => {
     const stationsRef = ref(db, 'waterStations')
@@ -199,7 +200,16 @@ export default function Maps() {
       <div className="flex-1 flex flex-col px-3 gap-2 pb-2 overflow-hidden">
         <div className="bg-midnight-blue rounded-lg p-2">
           <h2 className="text-white font-bold text-sm mb-1">📍 Water Stations Near You</h2>
-          <div ref={mapContainer} className="h-[200px] rounded-lg bg-gray-300 overflow-hidden" />
+          <div className="relative">
+            <div ref={mapContainer} className="h-[200px] rounded-lg bg-gray-300 overflow-hidden" />
+            <button
+              onClick={requestUserLocation}
+              className="absolute bottom-2 right-2 bg-white text-midnight-blue rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:bg-gray-100"
+              title="Find my location"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            </button>
+          </div>
           {selectedStation && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-white text-sm flex-1 truncate">{selectedStation.stationName}</span>

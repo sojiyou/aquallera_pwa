@@ -89,6 +89,18 @@ export default function StoreDetails() {
           )}
         </div>
 
+        {station.serviceTypes?.includes('delivery') && station.deliveryHours?.length > 0 && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">🚚 Delivery Hours</h2>
+            <p className="text-xs text-gray-500 mb-2">Available delivery time slots</p>
+            <div className="flex flex-wrap gap-2">
+              {station.deliveryHours.map((time, i) => (
+                <span key={i} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{to12Hour(time)}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">💲 Price List</h2>
           <div className="grid grid-cols-3 gap-2">
@@ -97,8 +109,8 @@ export default function StoreDetails() {
               <p className="text-midnight-blue font-bold">₱{(station.pricing_gallon_pure || 0).toFixed(2)}</p>
             </div>
             <div className="bg-order-list rounded-lg p-2 text-center">
-              <p className="text-xs text-gray-600">Spring (Liter)</p>
-              <p className="text-midnight-blue font-bold">₱{(station.pricing_liter_spring || 0).toFixed(2)}</p>
+              <p className="text-xs text-gray-600">Spring (Gallon)</p>
+              <p className="text-midnight-blue font-bold">₱{(station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0).toFixed(2)}</p>
             </div>
             <div className="bg-order-list rounded-lg p-2 text-center">
               <p className="text-xs text-gray-600">Mineral (Gallon)</p>
