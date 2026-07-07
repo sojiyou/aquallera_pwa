@@ -418,9 +418,12 @@ The admin website at `~/Desktop/Github/aquallera_web` is a separate Create React
 - Token: `VITE_MAPBOX_TOKEN` (see `.env`)
 - Default center: Burnham Park, Baguio `[120.593, 16.412]`, zoom 11
 - Viewport constrained to Baguio City bounds (`[[120.52, 16.36], [120.67, 16.46]]`)
-- Water station markers are custom SVG pins (midnight blue drop shape, scales with zoom)
+- **Overlapping layout:** Map fills the full container height; station list overlays as a draggable bottom panel with rounded top corners
+- **Draggable bottom sheet:** Panel snaps to three heights — **peek (15%)**, **default (55%)**, **expanded (85%)** — via mouse/touch drag on the handle bar
+- Station markers are custom SVG pins (midnight blue drop shape, scales with zoom)
 - Each marker has a **station name label** above it that scales with zoom and fades out below zoom 13 to prevent clutter
-- Station markers have click handlers that fly to the station and select it (shows name + "View Details")
+- Station markers have click handlers that fly to the station, select it, and auto-expand the panel to show nearby cards
+- A floating chip appears above the panel when a station is selected (name, address, "View" button, ✕ to deselect)
 - User location: **pulsing marker** (animated ring, blue dot with white center, scales with zoom)
 - On load: map shows Burnham Park centered at default zoom 11
 - User location is requested only on button click (no auto-fly on load)

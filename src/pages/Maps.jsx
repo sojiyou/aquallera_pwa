@@ -16,6 +16,8 @@ const BAGUIO_BOUNDS = [
 const MIN_ZOOM = 11
 const MAX_ZOOM = 18
 
+const SNAP_POINTS = [15, 55, 85]
+
 export default function Maps() {
   const navigate = useNavigate()
   const mapContainer = useRef(null)
@@ -26,12 +28,19 @@ export default function Maps() {
   const userMarkerRef = useRef(null)
   const userMarkerElRef = useRef(null)
 
+  const containerRef = useRef(null)
+  const dragRef = useRef({ startY: 0, startHeightPct: 55 })
+  const activeHandlersRef = useRef(null)
+  const latestPctRef = useRef(55)
+
   const [mapReady, setMapReady] = useState(false)
   const [mapZoom, setMapZoom] = useState(MIN_ZOOM)
   const [stations, setStations] = useState([])
   const [userLocation, setUserLocation] = useState(null)
   const [selectedStation, setSelectedStation] = useState(null)
   const [showHowToOrder, setShowHowToOrder] = useState(false)
+  const [panelHeightPct, setPanelHeightPct] = useState(55)
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
     const handleResize = () => map.current?.resize()
@@ -75,6 +84,18 @@ export default function Maps() {
     }
   }, [])
 
+  useEffect(() => {
+    return () => {
+      const h = activeHandlersRef.current
+      if (h) {
+        if (h.mouseMove) document.removeEventListener('mousemove', h.mouseMove)
+        if (h.mouseUp) document.removeEventListener('mouseup', h.mouseUp)
+        if (h.touchMove) document.removeEventListener('touchmove', h.touchMove)
+        if (h.touchEnd) document.removeEventListener('touchend', h.touchEnd)
+      }
+    }
+  }, [])
+
   const getUserMarkerSize = (zoom) => Math.max(14, Math.min(44, 18 + (zoom - 10) * 3))
 
   const requestUserLocation = useCallback(() => {
@@ -108,8 +129,6 @@ export default function Maps() {
       { enableHighAccuracy: true, timeout: 10000 }
     )
   }, [mapZoom])
-
-
 
   useEffect(() => {
     const stationsRef = ref(db, 'waterStations')
@@ -184,6 +203,8 @@ export default function Maps() {
         .addTo(map.current)
       wrapper.addEventListener('click', () => {
         setSelectedStation(s)
+        setPanelHeightPct(55)
+        latestPctRef.current = 55
         map.current.flyTo({ center: [s.longitude, s.latitude], zoom: 15 })
       })
       markersRef.current.push(marker)
@@ -217,14 +238,82 @@ export default function Maps() {
 
   const handleViewOnMap = useCallback((station) => {
     setSelectedStation(station)
+    setPanelHeightPct(55)
+    latestPctRef.current = 55
     if (map.current) {
       map.current.flyTo({ center: [station.longitude, station.latitude], zoom: 15 })
     }
   }, [])
 
+  const onHandleMouseDown = (e) => {
+    e.preventDefault()
+    const startPct = latestPctRef.current
+    dragRef.current = { startY: e.clientY, startHeightPct: startPct }
+    setIsDragging(true)
+
+    const onMove = (e) => {
+      if (!containerRef.current) return
+      const ch = containerRef.current.offsetHeight
+      const dy = dragRef.current.startY - e.clientY
+      const pct = Math.max(SNAP_POINTS[0], Math.min(SNAP_POINTS[2],
+        dragRef.current.startHeightPct + (dy / ch * 100)
+      ))
+      latestPctRef.current = pct
+      setPanelHeightPct(pct)
+    }
+
+    const onUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      const current = latestPctRef.current
+      const nearest = SNAP_POINTS.reduce((a, b) => Math.abs(b - current) < Math.abs(a - current) ? b : a)
+      setPanelHeightPct(nearest)
+      latestPctRef.current = nearest
+      activeHandlersRef.current = null
+    }
+
+    activeHandlersRef.current = { mouseMove: onMove, mouseUp: onUp }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
+  const onHandleTouchStart = (e) => {
+    const startPct = latestPctRef.current
+    dragRef.current = { startY: e.touches[0].clientY, startHeightPct: startPct }
+    setIsDragging(true)
+
+    const onMove = (e) => {
+      e.preventDefault()
+      if (!containerRef.current) return
+      const ch = containerRef.current.offsetHeight
+      const dy = dragRef.current.startY - e.touches[0].clientY
+      const pct = Math.max(SNAP_POINTS[0], Math.min(SNAP_POINTS[2],
+        dragRef.current.startHeightPct + (dy / ch * 100)
+      ))
+      latestPctRef.current = pct
+      setPanelHeightPct(pct)
+    }
+
+    const onEnd = () => {
+      setIsDragging(false)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', onEnd)
+      const current = latestPctRef.current
+      const nearest = SNAP_POINTS.reduce((a, b) => Math.abs(b - current) < Math.abs(a - current) ? b : a)
+      setPanelHeightPct(nearest)
+      latestPctRef.current = nearest
+      activeHandlersRef.current = null
+    }
+
+    activeHandlersRef.current = { touchMove: onMove, touchEnd: onEnd }
+    document.addEventListener('touchmove', onMove, { passive: false })
+    document.addEventListener('touchend', onEnd)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-app-bg">
-      <div className="flex items-center gap-3 px-3 py-2 bg-app-bg shrink-0">
+      <div className="flex items-center gap-3 px-3 py-2 bg-app-bg shrink-0 z-30">
         <img src="/logo-no-name.png" alt="Aquallera Logo" className="w-[60px] h-[60px] object-contain shrink-0" />
         <div className="flex-1">
           <h1 className="text-midnight-blue font-bold text-lg leading-tight">Aquallera</h1>
@@ -232,29 +321,53 @@ export default function Maps() {
         </div>
         <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[8px] px-2 py-1 leading-none">How to Order</button>
       </div>
-      <div className="flex-1 flex flex-col px-3 gap-2 pb-2 overflow-hidden">
-        <div className="bg-midnight-blue rounded-lg p-2">
-          <h2 className="text-white font-bold text-sm mb-1">📍 Water Stations Near You</h2>
-          <div className="relative">
-            <div ref={mapContainer} className="h-[200px] rounded-lg bg-gray-300 overflow-hidden" />
-            <button
-              onClick={requestUserLocation}
-              className="absolute bottom-2 right-2 bg-white text-midnight-blue rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:bg-gray-100"
-              title="Find my location"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-            </button>
-          </div>
-          {selectedStation && (
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-white text-sm flex-1 truncate">{selectedStation.stationName}</span>
-              <button onClick={() => navigate(`/store/${selectedStation.id}`)} className="bg-[#ECEFF1] text-midnight-blue text-xs px-3 py-1 rounded-lg">View Details</button>
+
+      <div ref={containerRef} className="flex-1 relative overflow-hidden">
+        <div ref={mapContainer} className="absolute inset-0 bg-gray-300 overflow-hidden" />
+
+        <button
+          onClick={requestUserLocation}
+          className="absolute top-4 right-4 bg-white text-midnight-blue rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:bg-gray-100 z-10"
+          title="Find my location"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+        </button>
+
+        {selectedStation && (
+          <div className="absolute bottom-24 left-4 right-4 z-10 pointer-events-none">
+            <div className="bg-white rounded-xl shadow-lg px-4 py-3 pointer-events-auto flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-midnight-blue truncate">{selectedStation.stationName}</p>
+                <p className="text-xs text-gray-500 truncate">{selectedStation.address || ''}</p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0 ml-2">
+                <button onClick={() => navigate(`/store/${selectedStation.id}`)} className="bg-midnight-blue text-white text-xs px-3 py-1.5 rounded-lg font-medium">View</button>
+                <button onClick={() => setSelectedStation(null)} className="text-gray-400 hover:text-gray-600 p-1 text-sm">✕</button>
+              </div>
             </div>
-          )}
-        </div>
-        <div className="flex-1 bg-white rounded-lg p-3 flex flex-col min-h-0">
-          <h3 className="text-midnight-blue font-bold text-sm mb-2">💧 All Water Stations</h3>
-          <div className="flex-1 overflow-y-auto space-y-2">
+          </div>
+        )}
+
+        <div
+          className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg flex flex-col z-20"
+          style={{
+            height: `${panelHeightPct}%`,
+            transition: isDragging ? 'none' : 'height 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+          }}
+        >
+          <div
+            className="w-full py-2 flex-shrink-0 cursor-grab active:cursor-grabbing select-none touch-none"
+            onMouseDown={onHandleMouseDown}
+            onTouchStart={onHandleTouchStart}
+          >
+            <div className="w-10 h-1.5 bg-gray-300 rounded-full mx-auto" />
+          </div>
+
+          <div className="px-4 pb-3 flex-shrink-0">
+            <h3 className="text-midnight-blue font-bold text-sm">💧 All Water Stations</h3>
+          </div>
+
+          <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 space-y-2">
             {stations.length > 0 ? stations.map((s) => (
               <WaterStationCard key={s.id} station={s} userLocation={userLocation} onViewOnMap={handleViewOnMap} />
             )) : (
@@ -266,6 +379,7 @@ export default function Maps() {
           </div>
         </div>
       </div>
+
       <BottomNav />
       {showHowToOrder && <HowToOrderDialog onClose={() => setShowHowToOrder(false)} />}
     </div>

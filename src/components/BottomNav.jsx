@@ -22,7 +22,7 @@ export default function BottomNav() {
                 ${isActive ? 'opacity-100' : 'opacity-60'}`}
             >
               <span className="text-lg">{tab.icon}</span>
-              <span className={`text-xs mt-0.5 ${isActive ? 'text-blue' : 'text-light-yellow'}`}>
+              <span className={`text-xs mt-0.5 ${isActive ? 'text-white' : 'text-light-yellow'}`}>
                 {tab.label}
               </span>
             </button>
