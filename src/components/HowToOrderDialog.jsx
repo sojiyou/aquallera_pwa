@@ -1,5 +1,5 @@
 const steps = [
-  { num: 1, title: 'Select a Water Station', desc: 'Browse stations on the map or list below. Tap to see location.' },
+  { num: 1, title: 'Select a Water Station', desc: 'Browse stations on the map or list below. Click "View on Map" to see the location.' },
   { num: 2, title: "Click 'Order Now'", desc: "Tap the 'Order Now' button on your chosen station card." },
   { num: 3, title: 'Choose Water Type and Quantity', desc: 'Select Pure, Spring, or Mineral water. Adjust quantities using + and - buttons.' },
   { num: 4, title: 'Select Pickup or Delivery', desc: 'Choose Delivery (with location) or Pickup. Delivery requires your current location.' },

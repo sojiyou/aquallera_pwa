@@ -63,7 +63,7 @@ export default function Signup() {
         <path fill="#ffffff" d="M0,550L48,565.3C96,580.7,192,611.3,288,608C384,604.7,480,568,576,554.7C672,541.3,768,552,864,578.7C960,605.3,1056,648,1152,632C1248,616,1344,541.3,1392,504L1440,466.7L1440,900L1392,900C1344,900,1248,900,1152,900C1056,900,960,900,864,900C768,900,672,900,576,900C480,900,384,900,288,900C192,900,96,900,48,900L0,900Z"/>
       </svg>
       <div className="flex-1 overflow-y-auto relative z-10">
-        <div className="flex flex-col items-center pt-6">
+        <div className="flex flex-col items-center pt-4">
           <img src="/logo-no-name.png" alt="Aquallera Logo" className="w-[150px] h-[150px] object-contain mb-6" />
           <div className="w-full max-w-md mx-auto px-10">
             <button onClick={() => navigate(-1)} className="text-light-yellow mb-2">
@@ -71,7 +71,7 @@ export default function Signup() {
             </button>
             <h1 className="text-light-yellow text-2xl font-bold mb-1">Sign Up</h1>
             <p className="text-gray-300 text-base mb-6">Welcome! Create an account to continue.</p>
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-xl shadow-lg p-8 mb-4">
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
                 <FloatingInput label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} required />

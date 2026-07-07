@@ -238,8 +238,8 @@ export default function Maps() {
 
   const handleViewOnMap = useCallback((station) => {
     setSelectedStation(station)
-    setPanelHeightPct(55)
-    latestPctRef.current = 55
+    setPanelHeightPct(SNAP_POINTS[0])
+    latestPctRef.current = SNAP_POINTS[0]
     if (map.current) {
       map.current.flyTo({ center: [station.longitude, station.latitude], zoom: 15 })
     }
@@ -319,7 +319,7 @@ export default function Maps() {
           <h1 className="text-midnight-blue font-bold text-lg leading-tight">Aquallera</h1>
           <p className="text-gray-500 italic text-xs">&ldquo;Clean Water, Anytime, Anywhere.&rdquo;</p>
         </div>
-        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[8px] px-2 py-1 leading-none">How to Order</button>
+        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[10px] px-2.5 py-1.5 leading-none">How to Order</button>
       </div>
 
       <div ref={containerRef} className="flex-1 relative overflow-hidden">
@@ -349,7 +349,7 @@ export default function Maps() {
         )}
 
         <div
-          className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg flex flex-col z-20"
+          className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg flex flex-col z-20"
           style={{
             height: `${panelHeightPct}%`,
             transition: isDragging ? 'none' : 'height 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
@@ -360,7 +360,7 @@ export default function Maps() {
             onMouseDown={onHandleMouseDown}
             onTouchStart={onHandleTouchStart}
           >
-            <div className="w-10 h-1.5 bg-gray-300 rounded-full mx-auto" />
+            <div className="w-10 h-1.5 bg-gray-300 rounded-lg mx-auto" />
           </div>
 
           <div className="px-4 pb-3 flex-shrink-0">
