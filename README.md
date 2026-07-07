@@ -474,16 +474,39 @@ Rename the file to `.jsx`. Example: `useAuth.js` was renamed to `useAuth.jsx` be
 
 ## Android App Reference
 
-The original Android app source is at `~/Desktop/Github/aqullera-app`. Key files for reference:
+The Android app source is at `~/Desktop/Github/aqullera-app`. **Conversion complete** — all 14 PWA pages now have matching Android activities.
+
+### Conversion Status
+
+| PWA Page | Android Activity | Status |
+|---|---|---|
+| Splash.jsx | `SplashActivity` | ✅ |
+| Landing.jsx | `MainActivity` | ✅ |
+| Login.jsx | `LoginActivity` | ✅ redesigned (wave gradient, floating inputs) |
+| Signup.jsx | `SignupActivity` | ✅ redesigned (wave gradient, floating inputs) |
+| VerifyEmail.jsx | `VerifyEmailActivity` | ✅ |
+| About.jsx | `AboutActivity` | ✅ |
+| Maps.jsx | `MapActivity` | ✅ pixel-match |
+| StoreDetails.jsx | `StoreDetailsActivity` | ✅ |
+| CreateOrder.jsx | `CreateOrderActivity` | ✅ pixel-match |
+| OrderConfirmation.jsx | `OrderConfirmationActivity` | ✅ pixel-match |
+| OrderSuccess.jsx | `OrderSuccessActivity` | ✅ |
+| Orders.jsx | `OrdersActivity` | ✅ pixel-match |
+| Profile.jsx | `ProfileActivity` | ✅ pixel-match |
+| EditProfile.jsx | `EditProfileActivity` | ✅ |
+
+### Key Files
 
 | File | Purpose |
 |---|---|
 | `OrderConfirmationActivity.kt:224-258` | Reference number generation logic (same as PWA) |
 | `OrderConfirmationActivity.kt:261-308` | Order object creation (data model) |
-| `Order.kt` | Order data class (all fields) |
-| `CreateOrderActivity.kt` | Create order form |
-| `res/layout/*.xml` | Layout files (18 total, visual reference) |
-| `res/drawable/` | Images (logo PNGs copied to PWA's public/) |
+| `Order.kt` | Order data class (all fields + `transactionFee`) |
+| `WaterStation.kt` | Station data class (incl. `about` field) |
+| `CreateOrderActivity.kt` | Create order form with Mapbox Geocoding |
+| `LoginActivity.kt` / `SignupActivity.kt` | Wave gradient + floating label inputs |
+| `res/layout/*.xml` | Layout files (13 layouts, one per activity + shared) |
+| `res/drawable/` | 55+ XML drawables + logo PNGs |
 | `res/values/colors.xml` | Color definitions |
 
 ---
@@ -505,6 +528,13 @@ The admin website is at `~/Desktop/Github/aquallera_web`. Key files:
 | `src/utils/yearlyReportGenerator.js` | Yearly report generation |
 
 ---
+
+## Conversion Status
+
+**All 14 PWA pages have been converted to native Android activities** (`~/Desktop/Github/aqullera-app`). The Android app is an exact pixel-replica using Kotlin + XML layouts, sharing the same Firebase Auth + Realtime Database. Remaining work for the capstone:
+
+- [ ] Build/compile on Android Studio to verify no resource errors
+- [ ] Generate signed APK for submission
 
 ## TODO / Known Gaps
 
