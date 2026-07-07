@@ -48,7 +48,7 @@ export default function Orders() {
   return (
     <div className="h-screen flex flex-col bg-app-bg">
       <div className="bg-midnight-blue text-white p-4 flex items-center gap-3 shrink-0">
-        <button onClick={() => navigate('/home')} className="text-white text-xl">&#x2190;</button>
+        <button onClick={() => navigate('/about')} className="text-white text-xl">&#x2190;</button>
         <h1 className="text-lg font-bold">My Orders</h1>
       </div>
       <div className="flex-1 p-4 overflow-y-auto">

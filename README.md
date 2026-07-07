@@ -21,6 +21,7 @@ All three share the same Firebase project (`aquallera`) and Realtime Database (`
 - **Mapbox GL JS v3** — interactive maps with station markers
 - **EmailJS** — REST API for order confirmation emails
 - **vite-plugin-pwa** — service worker + manifest for PWA installability
+- **Nunito** (Google Fonts) — Soft, rounded sans-serif font for a friendly UI
 
 ### Project Structure
 
@@ -35,12 +36,12 @@ aquallera-pwa/
 │   └── icons/icon-{192,512}x{192,512}.png  # PWA icons
 ├── src/
 │   ├── main.jsx              # Entry: BrowserRouter + AuthProvider
-│   ├── App.jsx               # All 12 routes with ProtectedRoute
+│   ├── App.jsx               # All 14 routes + ProtectedRoute with email guard + Nunito font
 │   ├── index.css             # Tailwind + custom classes (btn-primary, card, input-field, text-card)
 │   ├── hooks/
-│   │   └── useAuth.jsx       # AuthProvider context + useAuth hook
+│   │   └── useAuth.jsx       # AuthProvider context + useAuth hook (exposes emailVerified)
 │   ├── services/
-│   │   ├── firebase.js       # Firebase init + DB helpers + generateReferenceNumber
+│   │   ├── firebase.js       # Firebase init + DB helpers + generateReferenceNumber + sendEmailVerification
 │   │   ├── emailjs.js        # EmailJS REST sender
 │   │   └── haversine.js      # calculateDistance, formatDistance, isWithinRange
 │   ├── utils/
@@ -56,16 +57,17 @@ aquallera-pwa/
 │   └── pages/
 │       ├── Splash.jsx        # Auth-aware redirect (1.5s → /maps or /main)
 │       ├── Landing.jsx       # Logo + Login/Signup buttons + Footer
-│       ├── Login.jsx         # signInWithEmailAndPassword + user-friendly errors
-│       ├── Signup.jsx        # Duplicate phone check (orderByChild), createUser, write to /users
-│       ├── Home.jsx          # "Why Aqua-llera" info pages + BottomNav
+│       ├── Login.jsx         # signInWithEmailAndPassword + auto-creates /users record + gradient wave bg
+│       ├── Signup.jsx        # Duplicate phone+email checks, createUser, sendEmailVerification, gradient wave bg
+│       ├── VerifyEmail.jsx   # Full-page email verification blocker with auto-polling every 5s
+│       ├── About.jsx         # "What is Aqua-llera", "Why make Aquallera", "How to Order"
 │       ├── Maps.jsx          # Mapbox map + station markers + user location button + station list
 │       ├── StoreDetails.jsx  # Station details: hours, delivery hours, services, prices, about
 │       ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + delivery time slots
 │       ├── OrderConfirmation.jsx  # Receipt-style confirm + save to Firebase + email
 │       ├── OrderSuccess.jsx  # Success page with order details
 │       ├── Orders.jsx        # User's orders list — tap card to see receipt detail
-│       ├── Profile.jsx       # Avatar, account details, edit/logout/maps/orders/about
+│       ├── Profile.jsx       # Avatar, account details, email verification card, edit/logout/maps/orders/about
 │       └── EditProfile.jsx   # Edit name/email/phone → writes to /users/{uid}
 ```
 
@@ -79,7 +81,8 @@ aquallera-pwa/
 | `/main` | No | Landing |
 | `/login` | No | Login |
 | `/signup` | No | Signup |
-| `/home` | Yes | Home (info) |
+| `/verify-email` | No (redirects to /main if logged out) | Email verification blocker |
+| `/about` | Yes | About Aquallera |
 | `/maps` | Yes | Maps + station list |
 | `/store/:id` | Yes | Station details |
 | `/create-order/:id` | Yes | New order form |
@@ -164,8 +167,8 @@ Full order data model (matching Android `Order.kt`):
   "mineralWaterTotal": 0,
   "waterSubtotal": 50.0,
   "deliveryFee": 50.0,
-  "transactionFee": 20.0,
-  "grandTotal": 120.0,
+   "transactionFee": 5.0,
+   "grandTotal": 105.0,
   "deliveryLatitude": 16.4123,
   "deliveryLongitude": 120.5931,
   "locationDetails": "123 Session Rd, Baguio City",
@@ -198,7 +201,7 @@ Auto-incremented by `runTransaction` on each order placement. Resets per day.
 
 ## Firebase Rules
 
-Required Firebase Realtime Database rules (currently in use). **Must add `.indexOn: "number"` to the `users` node** to support the duplicate phone number check in Signup:
+Required Firebase Realtime Database rules (currently in use). **Must add `.indexOn` to `users` and `waterStations` nodes** to support duplicate phone/email checks on signup:
 
 ```json
 {
@@ -206,8 +209,13 @@ Required Firebase Realtime Database rules (currently in use). **Must add `.index
     "users": {
       ".read": true,
       ".write": true,
-      ".indexOn": "number"
+      ".indexOn": ["number", "email"]
     },
+    "waterStations": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": "email",
+      "$stationId": {
     "admins": {
       ".read": true,
       ".write": true
@@ -313,10 +321,35 @@ Custom component classes (defined in `src/index.css`):
 - **Counter:** Daily auto-incrementing counter stored at `orderCounter/{yyyyMMdd}` in Firebase, atomically incremented via `runTransaction` — same logic as the Android app (`OrderConfirmationActivity.kt:224-258`)
 - **Firebase key:** The order is stored at `orders/{orderId}` using `set()` not `push()`, matching the Android app
 
-### Duplicate Phone Number Check
-- Signup queries `/users` with `orderByChild('number')` and `equalTo()`
-- This requires `.indexOn: "number"` in Firebase rules on the `users` node
+### Duplicate Phone & Email Checks
+- Signup queries `/users` with `orderByChild('number')` and `equalTo()` for duplicate phone
+- Also queries `/users` with `orderByChild('email')` and `equalTo()` for duplicate customer email
+- Also queries `/waterStations` with `orderByChild('email')` and `equalTo()` for duplicate station owner email
+- These require `.indexOn: ["number", "email"]` on the `users` node and `.indexOn: "email"` on the `waterStations` node
 - On success, writes `{ uid, fullName, email, number, createdAt }` to `/users/{uid}`
+
+### Login Auto-Create User Record
+- After successful `signInWithEmailAndPassword`, Login checks if `/users/{uid}` exists
+- If missing, checks `/waterStations/{uid}` for station owner data — creates user record from `ownerName`/`stationName` and `phone`
+- If missing from both, creates a minimal user record with email and empty fields
+- This ensures station owners who signed up on the admin website can log in to the PWA
+
+### Email Verification
+- `sendEmailVerification(cred.user)` is called right after account creation in Signup
+- The `useAuth` context exposes `emailVerified` from the Firebase Auth user object
+- **ProtectedRoute in App.jsx** checks `user.emailVerified` — unverified users are blocked from all protected routes (maps, orders, profile, etc.) and redirected to `/verify-email`
+- **`VerifyEmail.jsx`** is a full-page blocker that:
+  - Shows the user's email with instructions to check their inbox
+  - Automatically polls every **5 seconds** via `auth.currentUser.reload()`
+  - When verified is detected, triggers a page reload → `onAuthStateChanged` picks up the new status → redirects to `/maps`
+  - "Resend verification email" button with console error logging
+  - "Back to Login" to sign out
+- `CreateOrder.jsx` also checks `user.emailVerified` as a secondary guard — amber warning banner + "Preview Order" disabled when unverified
+- `Profile.jsx` shows a verification status card with:
+  - ✅ **Email Verified** badge (green) when confirmed
+  - ⚠️ **Email not verified** warning (amber) with "Resend verification email" and "Refresh status" button
+  - The "Refresh status" button calls `auth.currentUser.reload()` and updates local state
+- All three apps share the same Firebase project, so the sender name "Aquallera" applies universally
 
 ### Multi-Water-Type Ordering
 - All three water types (Pure/Gallon, Spring/Liter, Mineral/Gallon) have independent +/- counters
@@ -351,8 +384,14 @@ The admin website at `~/Desktop/Github/aquallera_web` is a separate Create React
 
 ### Authentication
 - Firebase Auth with email/password only
-- `useAuth.jsx` provides `{ user, loading }` context via `onAuthStateChanged`
-- `ProtectedRoute` component wraps all authenticated pages, redirects to `/main` if not logged in
+- `useAuth.jsx` provides `{ user, loading }` context via `onAuthStateChanged` (includes `emailVerified`)
+- **Email verification** (`sendEmailVerification`) sent after signup — all protected routes blocked until verified
+  - `ProtectedRoute` checks `emailVerified` and redirects to `/verify-email`
+  - `VerifyEmail.jsx` auto-polls every 5s and auto-redirects once verified
+  - Profile and CreateOrder show secondary verification status UIs
+- **Signup** (`Signup.jsx`): Duplicate phone check (`orderByChild('number')`), duplicate email check against `/users` and `/waterStations`, creates Firebase Auth user, writes to `/users/{uid}`, sends verification email, redirects to `/verify-email`
+- **Login** (`Login.jsx`): `signInWithEmailAndPassword` + auto-creates `/users/{uid}` record if missing (also checks `/waterStations/{uid}` for station owner fallback)
+- `ProtectedRoute` component wraps all authenticated pages, redirects to `/main` if not logged in, redirects to `/verify-email` if email not verified
 - Admin website uses its **own separate** auth (hardcoded credentials + `/admins` node), not Firebase Auth
 
 ### EmailJS
@@ -366,18 +405,28 @@ The admin website at `~/Desktop/Github/aquallera_web` is a separate Create React
 - Used in Login and Signup pages
 - Covers: `auth/email-already-in-use`, `auth/invalid-email`, `auth/weak-password`, `auth/user-not-found`, `auth/wrong-password`, `auth/invalid-credential`, `auth/too-many-requests`, `auth/network-request-failed`, `auth/internal-error`, `permission-denied`
 
+### Login & Signup UI Design
+- **Gradient background:** Dark blue gradient (`bg-gradient-to-b from-blue to-midnight-blue`) with decorative wave SVG overlay at 10% opacity
+- **Wave SVG:** 3-path wave design in light-yellow (`#E5C95F`) and white, covering the full background
+- **White card:** Form content sits in a `bg-white rounded-xl shadow-lg` card for contrast against the dark background
+- **Logo:** Clean logo without text (`/logo-no-name.png`) to reduce visual clutter
+- **Max-width forms:** Both pages use `max-w-md mx-auto` to prevent inputs from stretching too wide on tablets
+- Both pages share this design for visual consistency
+
 ### Maps
 - Mapbox GL JS loaded from npm package (not CDN) — CSS imported directly in the component
 - Token: `VITE_MAPBOX_TOKEN` (see `.env`)
 - Default center: Burnham Park, Baguio `[120.593, 16.412]`, zoom 11
 - Viewport constrained to Baguio City bounds (`[[120.52, 16.36], [120.67, 16.46]]`)
 - Water station markers are custom SVG pins (midnight blue drop shape, scales with zoom)
+- Each marker has a **station name label** above it that scales with zoom and fades out below zoom 13 to prevent clutter
 - Station markers have click handlers that fly to the station and select it (shows name + "View Details")
 - User location: **pulsing marker** (animated ring, blue dot with white center, scales with zoom)
-- On load: map shows Burnham Park → geolocation resolves → pulsing marker appears at user's location → after **2 second delay**, smoothly flies to user at zoom 14
+- On load: map shows Burnham Park centered at default zoom 11
+- User location is requested only on button click (no auto-fly on load)
 - ResizeObserver on the map container keeps the map sized correctly after layout shifts
 - Window resize listener + `map.resize()` on 'load' event for responsive sizing
-- Mapbox NavigationControl added to top-left
+- No map controls (NavigationControl and attribution are removed for a cleaner UI)
 
 ### WaterStationCard Distance
 - Calculates distance using haversine formula (inlined in component)
@@ -405,6 +454,12 @@ The `VITE_FIREBASE_API_KEY` or `REACT_APP_FIREBASE_API_KEY` in `.env` is a place
 
 ### "Permission denied" on database operations
 Check Firebase Realtime Database rules. The paths `/users`, `/orders`, `/waterStations`, `/orderCounter`, `/admins` must all have `.read: true, .write: true` (or appropriate auth rules).
+
+### "Failed to send verification email"
+Open the browser console (F12) to see the exact Firebase error code. Common causes:
+- `auth/unauthorized-continue-uri` — Add your app's URL to Firebase Console → Authentication → Settings → Authorized domains
+- `auth/too-many-requests` — Firebase rate-limited email sending; wait a few minutes
+- Firebase Spark plan email quota exceeded — wait 24h or upgrade
 
 ### Bundle too large for PWA service worker
 The `workbox.maximumFileSizeToCacheInBytes` in `vite.config.js` is set to 4 MiB to accommodate mapbox-gl. If the bundle grows further, increase this limit or use dynamic imports for code-splitting.
@@ -450,8 +505,9 @@ The admin website is at `~/Desktop/Github/aquallera_web`. Key files:
 
 ## TODO / Known Gaps
 
-1. **Firebase rules** — Add `.indexOn: "number"` to `users` node for signup duplicate phone check
-2. **orderCounter cleanup** — The `orderCounter` node may need periodic cleanup for old dates
-3. **PWA icons** — The Android drawable logo files are copied but the `icons/icon-192x192.png` and `icons/icon-512x512.png` need to be generated/resized from the logo
-4. **Offline support** — The PWA service worker precaches assets but no offline fallback pages are implemented
-5. **API key is hardcoded in .env** — Should be kept secure and not committed to git
+1. **Firebase rules** — Add `.indexOn: ["number", "email"]` to `users` and `.indexOn: "email"` to `waterStations` for signup duplicate checks (currently only works if indexes exist or dataset is small)
+2. **Admin website email verification** — Station owner signup on `aquallera_web` does not send `sendEmailVerification`, and login does not check `emailVerified`. Should be added for consistency.
+3. **orderCounter cleanup** — The `orderCounter` node may need periodic cleanup for old dates
+4. **PWA icons** — The Android drawable logo files are copied but the `icons/icon-192x192.png` and `icons/icon-512x512.png` need to be generated/resized from the logo
+5. **Offline support** — The PWA service worker precaches assets but no offline fallback pages are implemented
+6. **API key is hardcoded in .env** — Should be kept secure and not committed to git

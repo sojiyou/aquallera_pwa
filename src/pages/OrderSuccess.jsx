@@ -26,7 +26,7 @@ export default function OrderSuccess() {
       <p className="text-xs text-gray-500 text-center mb-6">You can track your order status in the Orders tab.</p>
 
       <div className="w-full flex flex-col gap-3 px-4">
-        <button onClick={() => navigate('/home')} className="btn-primary w-full">Back to Home</button>
+        <button onClick={() => navigate('/maps')} className="btn-primary w-full">Back to Maps</button>
         <button onClick={() => navigate('/orders')} className="btn-secondary w-full">View My Orders</button>
       </div>
     </div>

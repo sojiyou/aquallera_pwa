@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 
-export default function Home() {
+export default function About() {
   const navigate = useNavigate()
   return (
     <div className="h-screen flex flex-col bg-app-bg">

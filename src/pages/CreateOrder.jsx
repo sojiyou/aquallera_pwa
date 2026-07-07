@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
-import { db, ref, onValue, get, child } from '../services/firebase'
+import { auth, db, ref, onValue, get, child, sendEmailVerification } from '../services/firebase'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
@@ -71,6 +71,8 @@ export default function CreateOrder() {
   const subtotal = Object.entries(prices).reduce((sum, [type, price]) => sum + (price * (quantities[type] || 0)), 0)
   const grandTotal = subtotal + (orderType === 'Delivery' ? deliveryFee : 0) + transactionFee
   const hasItems = Object.values(quantities).some(q => q > 0)
+  const emailUnverified = !user?.emailVerified
+  const [verifSending, setVerifSending] = useState(false)
 
   const buildOrderData = () => ({
     customerId: user.uid,
@@ -211,6 +213,19 @@ export default function CreateOrder() {
     )
   }
 
+  const handleResendVerification = async () => {
+    if (!auth.currentUser) return
+    setVerifSending(true)
+    try {
+      await sendEmailVerification(auth.currentUser)
+      alert('Verification email sent! Check your inbox.')
+    } catch {
+      alert('Failed to send verification email.')
+    } finally {
+      setVerifSending(false)
+    }
+  }
+
   const today = new Date().toISOString().split('T')[0]
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
@@ -264,6 +279,21 @@ export default function CreateOrder() {
 
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🏪 Station</h2><p className="text-sm text-gray-600">{station.stationName}</p></div>
+
+        {emailUnverified && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <span className="text-amber-600 text-lg">⚠️</span>
+              <div className="flex-1">
+                <p className="text-amber-800 text-sm font-medium">Email not verified</p>
+                <p className="text-amber-700 text-xs mt-1">Please verify your email to place orders.</p>
+                <button onClick={handleResendVerification} disabled={verifSending} className="text-amber-800 text-xs font-medium underline mt-1">
+                  {verifSending ? 'Sending...' : 'Resend verification email'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">💧 Select Quantities</h2>
@@ -385,7 +415,7 @@ export default function CreateOrder() {
       </div>
 
       <div className="p-4">
-        <button onClick={() => setShowPreview(true)} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
+        <button onClick={() => setShowPreview(true)} className="btn-primary w-full" disabled={!hasItems || emailUnverified}>Preview Order</button>
       </div>
     </div>
   )
