@@ -396,13 +396,19 @@ export default function CreateOrder() {
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">Preferred Date</h2>
-          <input
-            type="date"
-            value={preferredDate}
-            onChange={(e) => setPreferredDate(e.target.value)}
-            min={today}
-            className="input-field w-full [color-scheme:light]"
-          />
+          <label className="input-field w-full flex items-center gap-2 cursor-pointer relative">
+            <svg className="w-5 h-5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className={preferredDate ? 'text-gray-800' : 'text-gray-400'}>{preferredDate || 'Select date'}</span>
+            <input
+              type="date"
+              value={preferredDate}
+              onChange={(e) => setPreferredDate(e.target.value)}
+              min={today}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
         </div>
 
         {preferredDate && orderType === 'Delivery' && station && station.deliveryHours && station.deliveryHours.length > 0 && (
