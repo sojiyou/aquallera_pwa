@@ -82,17 +82,28 @@ export default function Orders() {
     setCancellingId(null)
   }
 
-  if (selectedOrder) return (
-    <div className="min-h-dvh bg-app-bg flex flex-col">
-      <div className="p-4 flex items-center gap-3 border-b border-gray-200">
-        <button onClick={() => setSelectedOrder(null)} className="text-midnight-blue text-xl">&#x2190;</button>
-        <h1 className="text-midnight-blue font-bold text-lg">Order Details</h1>
+  if (selectedOrder) {
+    const selStatus = (selectedOrder.status || '').toLowerCase()
+    const canCancel = selStatus === 'pending' || selStatus === 'confirmed'
+    return (
+      <div className="min-h-dvh bg-app-bg flex flex-col">
+        <div className="p-4 flex items-center gap-3 border-b border-gray-200">
+          <button onClick={() => setSelectedOrder(null)} className="text-midnight-blue text-xl">&#x2190;</button>
+          <h1 className="text-midnight-blue font-bold text-lg">Order Details</h1>
+        </div>
+        <div className="flex-1 p-4 overflow-y-auto space-y-4">
+          <OrderReceipt order={selectedOrder} revoked={isRevoked(selectedOrder.stationId)} />
+          {canCancel && (
+            <button
+              onClick={() => handleCancelOrder(selectedOrder)}
+              disabled={cancellingId === selectedOrder.firebaseKey}
+              className="w-full py-3 rounded-lg bg-red-500 text-white font-medium text-sm disabled:opacity-50"
+            >{cancellingId === selectedOrder.firebaseKey ? 'Cancelling...' : 'Cancel Order'}</button>
+          )}
+        </div>
       </div>
-      <div className="flex-1 p-4 overflow-y-auto">
-        <OrderReceipt order={selectedOrder} revoked={isRevoked(selectedOrder.stationId)} />
-      </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="h-dvh flex flex-col bg-app-bg">
@@ -111,14 +122,7 @@ export default function Orders() {
           </div>
         ) : (
           orders.map((order) => (
-            <OrderTicketItem
-              key={order.firebaseKey}
-              order={order}
-              revoked={isRevoked(order.stationId)}
-              onCancel={() => handleCancelOrder(order)}
-              cancelling={cancellingId === order.firebaseKey}
-              onClick={() => setSelectedOrder(order)}
-            />
+            <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
           ))
         )}
       </div>
