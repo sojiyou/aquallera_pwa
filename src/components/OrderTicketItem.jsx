@@ -9,7 +9,7 @@ const statusColors = {
   cancelled: 'bg-red-500',
 }
 
-export default function OrderTicketItem({ order, onClick }) {
+export default function OrderTicketItem({ order, revoked, onClick }) {
   const status = (order.status || 'pending').toLowerCase()
   const date = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A')
   const qty = [order.pureWaterQty, order.springWaterQty, order.mineralWaterQty].filter(Boolean).join(' + ') || 'N/A'
@@ -21,6 +21,11 @@ export default function OrderTicketItem({ order, onClick }) {
       role="button"
       tabIndex={0}
     >
+      {revoked && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-2">
+          <p className="text-red-700 text-xs font-medium">Station no longer active</p>
+        </div>
+      )}
       <h3 className="font-bold text-midnight-blue text-lg mb-1">{order.stationName || 'Unknown Station'}</h3>
       <span className={`inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2 ${statusColors[status] || 'bg-yellow-500'}`}>
         {order.status || 'Pending'}

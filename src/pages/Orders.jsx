@@ -12,11 +12,27 @@ export default function Orders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [stationStatuses, setStationStatuses] = useState({})
+
+  useEffect(() => {
+    if (!user) return
+    const stationsRef = ref(db, 'waterStations')
+    const unsubStations = onValue(stationsRef, (snapshot) => {
+      const map = {}
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          map[child.key] = child.val().status || null
+        })
+      }
+      setStationStatuses(map)
+    })
+    return () => unsubStations()
+  }, [user])
 
   useEffect(() => {
     if (!user) return
     const ordersRef = ref(db, 'orders')
-    const unsub = onValue(ordersRef, (snapshot) => {
+    const unsubOrders = onValue(ordersRef, (snapshot) => {
       const list = []
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
@@ -30,8 +46,10 @@ export default function Orders() {
       setOrders(list)
       setLoading(false)
     })
-    return () => unsub()
+    return () => unsubOrders()
   }, [user])
+
+  const isRevoked = (stationId) => stationStatuses[stationId] === 'rejected'
 
   if (selectedOrder) return (
     <div className="min-h-dvh bg-app-bg flex flex-col">
@@ -40,7 +58,7 @@ export default function Orders() {
         <h1 className="text-midnight-blue font-bold text-lg">Order Details</h1>
       </div>
       <div className="flex-1 p-4 overflow-y-auto">
-        <OrderReceipt order={selectedOrder} />
+        <OrderReceipt order={selectedOrder} revoked={isRevoked(selectedOrder.stationId)} />
       </div>
     </div>
   )
@@ -62,7 +80,7 @@ export default function Orders() {
           </div>
         ) : (
           orders.map((order) => (
-            <OrderTicketItem key={order.firebaseKey} order={order} onClick={() => setSelectedOrder(order)} />
+            <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
           ))
         )}
       </div>

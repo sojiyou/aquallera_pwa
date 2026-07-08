@@ -1,6 +1,6 @@
 import { to12Hour } from '../utils/formatTime'
 
-export default function OrderReceipt({ order }) {
+export default function OrderReceipt({ order, revoked }) {
   const lineItems = [
     ...(order.pureWaterQty > 0 ? [{ name: 'Pure Water', qty: order.pureWaterQty, total: order.pureWaterTotal }] : []),
     ...(order.springWaterQty > 0 ? [{ name: 'Spring Water', qty: order.springWaterQty, total: order.springWaterTotal }] : []),
@@ -9,6 +9,12 @@ export default function OrderReceipt({ order }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 max-w-md mx-auto">
+      {revoked && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-red-700 text-sm font-medium">Station No Longer Active</p>
+          <p className="text-red-600 text-xs mt-1">The water station for this order has been revoked. Please contact support for assistance.</p>
+        </div>
+      )}
       <div className="text-center border-b border-dashed border-gray-300 pb-4 mb-4">
         <h2 className="text-midnight-blue font-bold text-xl">AQUA-LLERA</h2>
         <p className="text-xs text-gray-400">Order Receipt</p>
