@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { WheelPicker, WheelPickerWrapper } from '@ncdai/react-wheel-picker'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
 import { auth, db, ref, onValue, get, child, sendEmailVerification } from '../services/firebase'
@@ -235,40 +236,9 @@ export default function CreateOrder() {
     return times
   }, [])
 
-  const pickerRef = useRef(null)
-  const scrollTimer = useRef(null)
-
-  const getCenterTime = useCallback(() => {
-    const el = pickerRef.current
-    if (!el) return null
-    const items = el.querySelectorAll('[data-time]')
-    let closest = null
-    let closestDist = Infinity
-    const center = el.scrollTop + el.clientHeight / 2
-    items.forEach((item) => {
-      const dist = Math.abs(item.offsetTop + item.offsetHeight / 2 - center)
-      if (dist < closestDist) { closestDist = dist; closest = item.dataset.time }
-    })
-    return closest
-  }, [])
-
-  const handleScroll = useCallback(() => {
-    if (scrollTimer.current) clearTimeout(scrollTimer.current)
-    scrollTimer.current = setTimeout(() => {
-      const t = getCenterTime()
-      if (t) setPreferredTime(t)
-    }, 120)
-  }, [getCenterTime])
-
-  const scrollToTime = useCallback((t) => {
-    setPreferredTime(t)
-    const el = pickerRef.current
-    if (!el) return
-    const idx = timeOptions.indexOf(t)
-    if (idx === -1) return
-    const item = el.querySelector(`[data-time="${t}"]`)
-    if (item) item.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  }, [timeOptions])
+  const wheelPickerOptions = useMemo(() =>
+    timeOptions.map(t => ({ label: to12Hour(t), value: t })),
+  [timeOptions])
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -458,45 +428,17 @@ export default function CreateOrder() {
         {preferredDate && orderType === 'Pickup' && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
-            {!preferredTime ? (
-              <button
-                onClick={() => scrollToTime(timeOptions[Math.floor(timeOptions.length / 2)])}
-                className="w-full py-3 rounded-lg bg-input-bg text-gray-500 text-sm text-center hover:bg-gray-200 transition-colors"
-              >Tap to select pickup time</button>
-            ) : (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p>
-                  <button
-                    onClick={() => setPreferredTime('')}
-                    className="text-xs text-midnight-blue underline"
-                  >Change</button>
-                </div>
-                <div className="relative w-full">
-                  <div className="absolute top-1/2 left-2 right-2 h-11 -translate-y-1/2 rounded-lg bg-midnight-blue/10 pointer-events-none z-10" />
-                  <div
-                    ref={pickerRef}
-                    onScroll={handleScroll}
-                    className="relative w-full h-44 overflow-y-auto rounded-lg bg-[#D9D9D9] [&::-webkit-scrollbar]:hidden"
-                  >
-                    <div style={{ height: 66 }} className="shrink-0" />
-                    {timeOptions.map((t) => (
-                      <div
-                        key={t}
-                        data-time={t}
-                        onClick={() => scrollToTime(t)}
-                        className={`h-11 flex items-center justify-center text-sm font-medium transition-colors cursor-pointer select-none ${
-                          preferredTime === t
-                            ? 'bg-midnight-blue text-white font-bold'
-                            : 'text-gray-600'
-                        }`}
-                      >{to12Hour(t)}</div>
-                    ))}
-                    <div style={{ height: 66 }} className="shrink-0" />
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="flex justify-center">
+              <WheelPickerWrapper>
+                <WheelPicker
+                  options={wheelPickerOptions}
+                  value={preferredTime}
+                  onValueChange={setPreferredTime}
+                  visibleCount={5}
+                  optionItemHeight={36}
+                />
+              </WheelPickerWrapper>
+            </div>
           </div>
         )}
 
