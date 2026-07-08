@@ -51,7 +51,7 @@ aquallera-pwa/
 │   │   ├── Footer.jsx        # Social links, contact info (used in Landing/Login/Signup)
 │   │   ├── BottomNav.jsx     # 3-tab nav: Map | Orders | Profile
 │   │   ├── WaterStationCard.jsx  # Station card with status, pricing, distance, actions
-│   │   ├── OrderTicketItem.jsx   # Order list item with status badge, ref#, total
+│   │   ├── OrderTicketItem.jsx   # Order list card with status badge, ref#, total, revoked banner
 │   │   ├── OrderReceipt.jsx      # Shared receipt-style order detail component
 │   │   └── HowToOrderDialog.jsx  # 5-step modal dialog
 │   └── pages/
@@ -63,10 +63,10 @@ aquallera-pwa/
 │       ├── About.jsx         # "What is Aqua-llera", "Why make Aquallera", "How to Order"
 │       ├── Maps.jsx          # Mapbox map + station markers + user location button + station list
 │       ├── StoreDetails.jsx  # Station details: hours, delivery hours, services, prices, about
-│       ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + delivery time slots
+│   ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + native time slot picker
 │       ├── OrderConfirmation.jsx  # Receipt-style confirm + save to Firebase + email
 │       ├── OrderSuccess.jsx  # Success page with order details
-│       ├── Orders.jsx        # User's orders list — tap card to see receipt detail
+│   ├── Orders.jsx        # Orders list with status filter tabs, detail view with receipt + cancel, revoked handling
 │       ├── Profile.jsx       # Avatar, account details, email verification card, edit/logout/maps/orders/about
 │       └── EditProfile.jsx   # Edit name/email/phone → writes to /users/{uid}
 ```
