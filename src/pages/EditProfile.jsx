@@ -56,19 +56,19 @@ export default function EditProfile() {
       </div>
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-1">👤 Name</h2>
+          <h2 className="font-bold text-midnight-blue mb-1">Name</h2>
           <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full Name" className="input-field" />
         </div>
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-1">📧 Email</h2>
+          <h2 className="font-bold text-midnight-blue mb-1">Email</h2>
           <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email Address" className="input-field" />
         </div>
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-1">📞 Phone Number</h2>
+          <h2 className="font-bold text-midnight-blue mb-1">Phone Number</h2>
           <input type="tel" value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} placeholder="Phone Number" className="input-field" />
         </div>
         <button onClick={handleSave} disabled={saving} className="btn-primary w-full">
-          {saving ? 'Saving...' : '💾 Save Changes'}
+          {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </div>

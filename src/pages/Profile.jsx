@@ -80,13 +80,11 @@ export default function Profile() {
           <h3 className="font-bold text-midnight-blue mb-2">Email Verification</h3>
           {emailVerified ? (
             <div className="flex items-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
-              <span className="text-lg">✅</span>
               <span className="text-sm font-medium">Email Verified</span>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-3 rounded-lg">
-                <span className="text-lg">⚠️</span>
                 <span className="text-sm font-medium">Email not verified</span>
               </div>
               <p className="text-xs text-gray-500 px-1">Verify your email to place orders.</p>
@@ -103,11 +101,11 @@ export default function Profile() {
         </div>
 
         <div className="space-y-2">
-          <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">✏️ Edit Profile</button>
-          <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">🗺️ View Maps</button>
-          <button onClick={() => navigate('/orders')} className="btn-primary w-full text-left px-4">📋 View Orders</button>
-          <button onClick={() => navigate('/about')} className="btn-primary w-full text-left px-4">ℹ️ About Aquallera</button>
-          <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg font-medium text-left px-4">🚪 Log Out</button>
+          <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">Edit Profile</button>
+          <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">View Maps</button>
+          <button onClick={() => navigate('/orders')} className="btn-primary w-full text-left px-4">View Orders</button>
+          <button onClick={() => navigate('/about')} className="btn-primary w-full text-left px-4">About Aquallera</button>
+          <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg font-medium text-left px-4">Log Out</button>
         </div>
       </div>
       <BottomNav />

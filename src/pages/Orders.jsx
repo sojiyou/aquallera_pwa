@@ -56,7 +56,6 @@ export default function Orders() {
           <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <span className="text-6xl mb-4">📭</span>
             <p className="text-lg font-bold text-midnight-blue mb-2">No Orders Yet</p>
             <p className="text-sm mb-6 text-center">Locate a water station near you and place your first order!</p>
             <button onClick={() => navigate('/maps')} className="btn-primary">Find Water Stations</button>

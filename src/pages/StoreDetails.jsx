@@ -56,7 +56,7 @@ export default function StoreDetails() {
 
       <div className="flex-1 p-4 space-y-4">
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">⏰ Business Hours</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Business Hours</h2>
           {station.businessHours && Object.entries(station.businessHours).map(([day, hours]) => (
             <div key={day} className="flex justify-between text-sm py-0.5">
               <span className="text-gray-600">{day}</span>
@@ -66,7 +66,7 @@ export default function StoreDetails() {
         </div>
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">🛒 Offered Services</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Offered Services</h2>
           {(station.serviceTypes && station.serviceTypes.length) > 0 ? (
             <>
               <p className="text-xs text-gray-500 mb-2">
@@ -91,7 +91,7 @@ export default function StoreDetails() {
 
         {station.serviceTypes?.includes('delivery') && station.deliveryHours?.length > 0 && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">🚚 Delivery Hours</h2>
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Hours</h2>
             <p className="text-xs text-gray-500 mb-2">Available delivery time slots</p>
             <div className="flex flex-wrap gap-2">
               {station.deliveryHours.map((time, i) => (
@@ -102,7 +102,7 @@ export default function StoreDetails() {
         )}
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">💲 Price List</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Price List</h2>
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-order-list rounded-lg p-2 text-center">
               <p className="text-xs text-gray-600">Pure (Gallon)</p>
@@ -121,7 +121,7 @@ export default function StoreDetails() {
 
         {station.about && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">📝 About</h2>
+            <h2 className="font-bold text-midnight-blue mb-2">About</h2>
             <p className="text-sm text-gray-600">{station.about}</p>
           </div>
         )}

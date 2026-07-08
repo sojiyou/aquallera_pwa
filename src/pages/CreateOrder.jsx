@@ -238,22 +238,22 @@ export default function CreateOrder() {
         <h1 className="text-midnight-blue font-bold text-lg">Order Preview</h1>
       </div>
       <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🛍️ Order Summary</h2><p className="text-sm text-gray-600">Station: <strong>{station.stationName}</strong></p></div>
+        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Order Summary</h2><p className="text-sm text-gray-600">Station: <strong>{station.stationName}</strong></p></div>
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">📦 Items</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Items</h2>
           <div className="space-y-1">
             {waterTypeMeta.filter(t => quantities[t.key] > 0).map(t => (
               <p key={t.key} className="text-sm text-gray-600 capitalize">{t.label} water — {quantities[t.key]} {t.unit}(s) at ₱{(prices[t.key] || 0).toFixed(2)} each</p>
             ))}
           </div>
         </div>
-        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🚚 Order Type</h2><p className="text-sm text-gray-600">{orderType}</p></div>
-        {userAddress && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📍 Delivery Address</h2><p className="text-sm text-gray-600">{userAddress}</p></div>}
-        {preferredDate && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date</h2><p className="text-sm text-gray-600">{preferredDate}</p></div>}
-        {preferredTime && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">⏰ Preferred Time</h2><p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p></div>}
-        {deliveryInstructions && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">📝 Instructions</h2><p className="text-sm text-gray-600">{deliveryInstructions}</p></div>}
+        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Order Type</h2><p className="text-sm text-gray-600">{orderType}</p></div>
+        {userAddress && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Delivery Address</h2><p className="text-sm text-gray-600">{userAddress}</p></div>}
+        {preferredDate && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Preferred Date</h2><p className="text-sm text-gray-600">{preferredDate}</p></div>}
+        {preferredTime && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Preferred Time</h2><p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p></div>}
+        {deliveryInstructions && <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Instructions</h2><p className="text-sm text-gray-600">{deliveryInstructions}</p></div>}
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">💵 Payment Breakdown</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Payment Breakdown</h2>
           <div className="text-sm space-y-1">
             <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>₱{subtotal.toFixed(2)}</span></div>
             {orderType === 'Delivery' && <div className="flex justify-between"><span className="text-gray-600">Delivery Fee</span><span>₱{deliveryFee.toFixed(2)}</span></div>}
@@ -278,12 +278,11 @@ export default function CreateOrder() {
       </div>
 
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">🏪 Station</h2><p className="text-sm text-gray-600">{station.stationName}</p></div>
+        <div className="card"><h2 className="font-bold text-midnight-blue mb-2">Station</h2><p className="text-sm text-gray-600">{station.stationName}</p></div>
 
         {emailUnverified && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
             <div className="flex items-start gap-2">
-              <span className="text-amber-600 text-lg">⚠️</span>
               <div className="flex-1">
                 <p className="text-amber-800 text-sm font-medium">Email not verified</p>
                 <p className="text-amber-700 text-xs mt-1">Please verify your email to place orders.</p>
@@ -296,7 +295,7 @@ export default function CreateOrder() {
         )}
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">💧 Select Quantities</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Select Quantities</h2>
           <div className="space-y-3">
             {waterTypeMeta.map(({ key, label, unit }) => (
               <div key={key} className="flex items-center justify-between">
@@ -318,7 +317,7 @@ export default function CreateOrder() {
         </div>
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">🚚 Order Type</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Order Type</h2>
           <div className="flex gap-2">
             {availableOrderTypes.map((type) => (
               <button key={type} onClick={() => setOrderType(type)}
@@ -330,7 +329,7 @@ export default function CreateOrder() {
 
         {orderType === 'Delivery' && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">📍 Delivery Address</h2>
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Address</h2>
             <div className="relative" ref={searchContainerRef}>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -352,8 +351,8 @@ export default function CreateOrder() {
                 <button
                   onClick={handleGetLocation}
                   className="px-3 py-2 rounded-lg bg-midnight-blue text-white text-sm shrink-0"
-                  title="Get current location"
-                >📍</button>
+                    title="Get current location"
+                >GPS</button>
               </div>
               {isSearching && (
                 <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 p-2">
@@ -369,7 +368,6 @@ export default function CreateOrder() {
                       className="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                       onClick={() => selectSuggestion(result)}
                     >
-                      <span className="text-sm mr-2">📍</span>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-800 truncate">{result.text}</div>
                         <div className="text-xs text-gray-500 truncate">{result.place_name}</div>
@@ -383,13 +381,13 @@ export default function CreateOrder() {
         )}
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">📅 Preferred Date</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Preferred Date</h2>
           <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} min={today} className="input-field w-full" />
         </div>
 
         {preferredDate && orderType === 'Delivery' && station?.deliveryHours?.length > 0 && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">🚚 Delivery Time</h2>
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Time</h2>
             <p className="text-xs text-gray-500 mb-2">Select a delivery time slot</p>
             <div className="flex flex-wrap gap-2">
               {station.deliveryHours.map((time) => (
@@ -408,7 +406,7 @@ export default function CreateOrder() {
         )}
 
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">📝 Additional Details</h2>
+          <h2 className="font-bold text-midnight-blue mb-2">Additional Details</h2>
           <textarea value={deliveryInstructions} onChange={(e) => setDeliveryInstructions(e.target.value)}
             placeholder="e.g., Leave at gate, landmark, etc." className="input-field min-h-[60px]" />
         </div>

@@ -23,11 +23,9 @@ export default function WaterStationCard({ station, userLocation, onViewOnMap })
         </span>
       </div>
       <div className="flex items-start gap-1 mb-1">
-        <span>📍</span>
         <p className="text-xs text-gray-500 line-clamp-2">{station.address || 'Address not available'}</p>
       </div>
       <div className="flex items-center gap-1 mb-2">
-        <span>🚗</span>
         <span className="text-xs text-gray-500">{dist ? `${dist} away` : 'Distance unavailable'}</span>
       </div>
       <div className="bg-order-list rounded-lg px-3 py-2 flex flex-wrap gap-x-3 gap-y-1 text-xs mb-3">

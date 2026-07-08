@@ -364,7 +364,7 @@ export default function Maps() {
           </div>
 
           <div className="px-4 pb-3 flex-shrink-0">
-            <h3 className="text-midnight-blue font-bold text-sm">💧 All Water Stations</h3>
+            <h3 className="text-midnight-blue font-bold text-sm">All Water Stations</h3>
           </div>
 
           <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 space-y-2">
@@ -372,7 +372,6 @@ export default function Maps() {
               <WaterStationCard key={s.id} station={s} userLocation={userLocation} onViewOnMap={handleViewOnMap} />
             )) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <span className="text-5xl mb-2">📭</span>
                 <p className="text-sm">No water stations available</p>
               </div>
             )}

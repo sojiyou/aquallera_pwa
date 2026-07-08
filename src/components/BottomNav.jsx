@@ -1,9 +1,9 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const tabs = [
-  { path: '/maps', label: 'Map', icon: '🗺️', id: 'navMap' },
-  { path: '/orders', label: 'Orders', icon: '📋', id: 'navOrder' },
-  { path: '/profile', label: 'Profile', icon: '👤', id: 'navProfile' },
+  { path: '/maps', label: 'Map', id: 'navMap' },
+  { path: '/orders', label: 'Orders', id: 'navOrder' },
+  { path: '/profile', label: 'Profile', id: 'navProfile' },
 ]
 
 export default function BottomNav() {
@@ -21,7 +21,6 @@ export default function BottomNav() {
               className={`flex flex-col items-center justify-center w-full h-full py-2 rounded-md
                 ${isActive ? 'opacity-100' : 'opacity-60'}`}
             >
-              <span className="text-lg">{tab.icon}</span>
               <span className={`text-xs mt-0.5 ${isActive ? 'text-white' : 'text-light-yellow'}`}>
                 {tab.label}
               </span>
