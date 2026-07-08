@@ -9,7 +9,9 @@ const statusColors = {
   cancelled: 'bg-red-500',
 }
 
-export default function OrderTicketItem({ order, revoked, onClick }) {
+const cancellable = (status) => ['pending', 'confirmed'].includes(status)
+
+export default function OrderTicketItem({ order, revoked, onCancel, cancelling, onClick }) {
   const status = (order.status || 'pending').toLowerCase()
   const date = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A')
   const qty = [order.pureWaterQty, order.springWaterQty, order.mineralWaterQty].filter(Boolean).join(' + ') || 'N/A'
@@ -26,7 +28,16 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
           <p className="text-red-700 text-xs font-medium">Station no longer active</p>
         </div>
       )}
-      <h3 className="font-bold text-midnight-blue text-lg mb-1">{order.stationName || 'Unknown Station'}</h3>
+      <div className="flex items-start justify-between mb-1">
+        <h3 className="font-bold text-midnight-blue text-lg">{order.stationName || 'Unknown Station'}</h3>
+        {cancellable(status) && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onCancel?.() }}
+            disabled={cancelling}
+            className="text-xs text-red-600 font-medium underline shrink-0 ml-2 disabled:opacity-50"
+          >{cancelling ? 'Cancelling...' : 'Cancel'}</button>
+        )}
+      </div>
       <span className={`inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2 ${statusColors[status] || 'bg-yellow-500'}`}>
         {order.status || 'Pending'}
       </span>

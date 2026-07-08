@@ -4,7 +4,7 @@ import BottomNav from '../components/BottomNav'
 import OrderTicketItem from '../components/OrderTicketItem'
 import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
-import { db, ref, onValue } from '../services/firebase'
+import { db, ref, onValue, update } from '../services/firebase'
 
 export default function Orders() {
   const { user } = useAuth()
@@ -13,6 +13,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [stationStatuses, setStationStatuses] = useState({})
+  const [cancellingId, setCancellingId] = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -21,7 +22,8 @@ export default function Orders() {
       const map = {}
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
-          map[child.key] = child.val().status || null
+          const data = child.val()
+          map[child.key] = { status: data.status || null, revokedAt: data.revokedAt || null }
         })
       }
       setStationStatuses(map)
@@ -49,7 +51,36 @@ export default function Orders() {
     return () => unsubOrders()
   }, [user])
 
-  const isRevoked = (stationId) => stationStatuses[stationId] === 'rejected'
+  const isRevoked = (stationId) => {
+    const s = stationStatuses[stationId]
+    if (!s) return false
+    return s.status === 'deletion_pending' || s.revokedAt
+  }
+
+  useEffect(() => {
+    const toCancel = orders.filter((o) => {
+      const s = (o.status || '').toLowerCase()
+      return isRevoked(o.stationId) && (s === 'pending' || s === 'confirmed')
+    })
+    toCancel.forEach((o) => {
+      update(ref(db, `orders/${o.firebaseKey}`), {
+        status: 'cancelled',
+        cancellationReason: 'Station no longer active',
+        updatedAt: new Date().toISOString()
+      })
+    })
+  }, [orders, stationStatuses])
+
+  const handleCancelOrder = async (order) => {
+    setCancellingId(order.firebaseKey)
+    try {
+      await update(ref(db, `orders/${order.firebaseKey}`), {
+        status: 'cancelled',
+        updatedAt: new Date().toISOString()
+      })
+    } catch {}
+    setCancellingId(null)
+  }
 
   if (selectedOrder) return (
     <div className="min-h-dvh bg-app-bg flex flex-col">
@@ -80,7 +111,14 @@ export default function Orders() {
           </div>
         ) : (
           orders.map((order) => (
-            <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
+            <OrderTicketItem
+              key={order.firebaseKey}
+              order={order}
+              revoked={isRevoked(order.stationId)}
+              onCancel={() => handleCancelOrder(order)}
+              cancelling={cancellingId === order.firebaseKey}
+              onClick={() => setSelectedOrder(order)}
+            />
           ))
         )}
       </div>
