@@ -19,7 +19,7 @@ export default function Splash() {
   }, [navigate])
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-app-bg">
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg">
       <div className="w-[200px] h-[200px] rounded-full bg-midnight-blue flex items-center justify-center mb-4">
         <span className="text-light-yellow text-7xl font-bold">A</span>
       </div>

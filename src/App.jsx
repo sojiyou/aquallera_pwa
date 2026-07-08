@@ -17,7 +17,7 @@ import { useAuth } from './hooks/useAuth'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
   if (!user) return <Navigate to="/main" replace />
   if (!user.emailVerified) return <Navigate to="/verify-email" replace />
   return children

@@ -5,7 +5,7 @@ export default function Landing() {
   const navigate = useNavigate()
 
   return (
-    <div className="h-screen flex flex-col bg-app-bg">
+    <div className="h-dvh flex flex-col bg-app-bg">
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col items-center px-4 pt-10 pb-6">
           <img src="/logo.png" alt="Aquallera Logo" className="w-[260px] h-[260px] object-contain mb-6" />

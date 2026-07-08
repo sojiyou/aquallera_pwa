@@ -11,7 +11,7 @@ export default function BottomNav() {
   const navigate = useNavigate()
 
   return (
-    <nav className="bg-footer-bg h-14 flex items-center px-2 shrink-0">
+    <nav className="bg-footer-bg h-14 flex items-center px-2 shrink-0 pb-[env(safe-area-inset-bottom)]">
       {tabs.map((tab, i) => {
         const isActive = location.pathname === tab.path
         return (

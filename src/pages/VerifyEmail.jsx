@@ -38,12 +38,12 @@ export default function VerifyEmail() {
     }
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
   if (!user) return <Navigate to="/main" replace />
   if (user.emailVerified) return <Navigate to="/maps" replace />
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-app-bg px-6">
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg px-6">
       <img src="/logo.png" alt="Aquallera Logo" className="w-[120px] h-[120px] object-contain mb-6" />
       <h1 className="text-midnight-blue font-bold text-xl mb-2">Verify Your Email</h1>
       <p className="text-gray-500 text-sm text-center mb-2">

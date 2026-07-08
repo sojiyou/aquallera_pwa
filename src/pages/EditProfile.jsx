@@ -46,10 +46,10 @@ export default function EditProfile() {
     }
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
 
   return (
-    <div className="h-screen bg-app-bg flex flex-col">
+    <div className="h-dvh bg-app-bg flex flex-col">
       <div className="bg-midnight-blue text-white p-4 flex items-center gap-3 shrink-0">
         <button onClick={() => navigate('/profile')} className="text-white text-xl">&#x2190;</button>
         <h1 className="text-lg font-bold">Edit Profile</h1>

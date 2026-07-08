@@ -34,7 +34,7 @@ export default function Orders() {
   }, [user])
 
   if (selectedOrder) return (
-    <div className="min-h-screen bg-app-bg flex flex-col">
+    <div className="min-h-dvh bg-app-bg flex flex-col">
       <div className="p-4 flex items-center gap-3 border-b border-gray-200">
         <button onClick={() => setSelectedOrder(null)} className="text-midnight-blue text-xl">&#x2190;</button>
         <h1 className="text-midnight-blue font-bold text-lg">Order Details</h1>
@@ -46,7 +46,7 @@ export default function Orders() {
   )
 
   return (
-    <div className="h-screen flex flex-col bg-app-bg">
+    <div className="h-dvh flex flex-col bg-app-bg">
       <div className="bg-midnight-blue text-white p-3 flex items-center gap-3 shrink-0">
         <button onClick={() => navigate('/about')} className="text-white text-xl">&#x2190;</button>
         <h1 className="text-lg font-bold">My Orders</h1>

@@ -19,13 +19,13 @@ export default function StoreDetails() {
   }, [id])
 
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-app-bg">
+    <div className="h-dvh flex items-center justify-center bg-app-bg">
       <span className="loading loading-spinner loading-lg text-midnight-blue"></span>
     </div>
   )
 
   if (!station) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-app-bg gap-4">
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4">
       <p className="text-midnight-blue font-bold text-xl">Station not found</p>
       <button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button>
     </div>
@@ -37,7 +37,7 @@ export default function StoreDetails() {
   const today = days[new Date().getDay()]
 
   return (
-    <div className="min-h-screen bg-app-bg flex flex-col">
+    <div className="min-h-dvh bg-app-bg flex flex-col">
       <div className="bg-midnight-blue text-white p-4">
         <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate(-1)} className="text-white text-xl">&#x2190;</button>

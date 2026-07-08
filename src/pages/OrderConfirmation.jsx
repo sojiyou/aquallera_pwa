@@ -11,7 +11,7 @@ export default function OrderConfirmation() {
   const orderData = state?.orderData
 
   if (!orderData) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-app-bg gap-4">
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4">
       <p className="text-midnight-blue font-bold">No order data found.</p>
       <button onClick={() => navigate('/maps')} className="btn-primary">Back to Maps</button>
     </div>
@@ -58,7 +58,7 @@ export default function OrderConfirmation() {
   }
 
   return (
-    <div className="min-h-screen bg-app-bg flex flex-col">
+    <div className="min-h-dvh bg-app-bg flex flex-col">
       <div className="p-4 flex items-center gap-3 border-b border-gray-200">
         <button onClick={() => navigate(-1)} className="text-midnight-blue text-xl">&#x2190;</button>
         <h1 className="text-midnight-blue font-bold text-lg">Confirm Order</h1>

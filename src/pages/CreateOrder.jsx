@@ -228,11 +228,11 @@ export default function CreateOrder() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
-  if (!station) return <div className="h-screen flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
 
   if (showPreview) return (
-    <div className="h-screen bg-app-bg flex flex-col">
+    <div className="h-dvh bg-app-bg flex flex-col">
       <div className="p-4 flex items-center gap-3 border-b border-gray-200">
         <button onClick={() => setShowPreview(false)} className="text-midnight-blue text-xl">&#x2190;</button>
         <h1 className="text-midnight-blue font-bold text-lg">Order Preview</h1>
@@ -271,7 +271,7 @@ export default function CreateOrder() {
   )
 
   return (
-    <div className="min-h-screen bg-app-bg flex flex-col">
+    <div className="min-h-dvh bg-app-bg flex flex-col">
       <div className="bg-midnight-blue text-white p-4 flex items-center gap-3 shrink-0">
         <button onClick={() => navigate(-1)} className="text-white text-xl">&#x2190;</button>
         <h1 className="text-lg font-bold truncate">New Order</h1>

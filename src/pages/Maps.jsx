@@ -312,7 +312,7 @@ export default function Maps() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-app-bg">
+    <div className="h-dvh flex flex-col bg-app-bg">
       <div className="flex items-center gap-3 px-3 py-2 bg-app-bg shrink-0 z-30">
         <img src="/logo-no-name.png" alt="Aquallera Logo" className="w-[60px] h-[60px] object-contain shrink-0" />
         <div className="flex-1">

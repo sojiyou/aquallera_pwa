@@ -57,7 +57,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-app-bg">
+    <div className="h-dvh flex flex-col bg-app-bg">
       <div className="flex-1 p-4 overflow-y-auto">
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full bg-midnight-blue flex items-center justify-center text-white text-4xl font-bold mb-2">
