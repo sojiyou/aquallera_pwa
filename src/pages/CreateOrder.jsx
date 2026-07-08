@@ -458,30 +458,45 @@ export default function CreateOrder() {
         {preferredDate && orderType === 'Pickup' && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
-            <p className="text-xs text-gray-500 mb-2">Select a pickup time</p>
-            <div className="relative w-full">
-              <div className="absolute top-1/2 left-2 right-2 h-11 -translate-y-1/2 rounded-lg bg-midnight-blue/10 pointer-events-none z-10" />
-              <div
-                ref={pickerRef}
-                onScroll={handleScroll}
-                className="relative w-full h-44 overflow-y-auto rounded-lg bg-[#D9D9D9] [&::-webkit-scrollbar]:hidden"
-              >
-                <div style={{ height: 66 }} className="shrink-0" />
-                {timeOptions.map((t) => (
+            {!preferredTime ? (
+              <button
+                onClick={() => scrollToTime(timeOptions[Math.floor(timeOptions.length / 2)])}
+                className="w-full py-3 rounded-lg bg-input-bg text-gray-500 text-sm text-center hover:bg-gray-200 transition-colors"
+              >Tap to select pickup time</button>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-gray-600">{to12Hour(preferredTime)}</p>
+                  <button
+                    onClick={() => setPreferredTime('')}
+                    className="text-xs text-midnight-blue underline"
+                  >Change</button>
+                </div>
+                <div className="relative w-full">
+                  <div className="absolute top-1/2 left-2 right-2 h-11 -translate-y-1/2 rounded-lg bg-midnight-blue/10 pointer-events-none z-10" />
                   <div
-                    key={t}
-                    data-time={t}
-                    onClick={() => scrollToTime(t)}
-                    className={`h-11 flex items-center justify-center text-sm font-medium transition-colors cursor-pointer select-none ${
-                      preferredTime === t
-                        ? 'bg-midnight-blue text-white font-bold'
-                        : 'text-gray-600'
-                    }`}
-                  >{to12Hour(t)}</div>
-                ))}
-                <div style={{ height: 66 }} className="shrink-0" />
+                    ref={pickerRef}
+                    onScroll={handleScroll}
+                    className="relative w-full h-44 overflow-y-auto rounded-lg bg-[#D9D9D9] [&::-webkit-scrollbar]:hidden"
+                  >
+                    <div style={{ height: 66 }} className="shrink-0" />
+                    {timeOptions.map((t) => (
+                      <div
+                        key={t}
+                        data-time={t}
+                        onClick={() => scrollToTime(t)}
+                        className={`h-11 flex items-center justify-center text-sm font-medium transition-colors cursor-pointer select-none ${
+                          preferredTime === t
+                            ? 'bg-midnight-blue text-white font-bold'
+                            : 'text-gray-600'
+                        }`}
+                      >{to12Hour(t)}</div>
+                    ))}
+                    <div style={{ height: 66 }} className="shrink-0" />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
