@@ -17,16 +17,6 @@ const filterTabs = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
-const tabColors = {
-  pending: 'bg-yellow-500',
-  confirmed: 'bg-blue-500',
-  preparing: 'bg-indigo-500',
-  on_delivery: 'bg-orange-500',
-  ready: 'bg-teal-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-red-500',
-}
-
 export default function Orders() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -145,9 +135,7 @@ export default function Orders() {
               onClick={() => setFilterStatus(tab.value)}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 filterStatus === tab.value
-                  ? tab.value === 'all'
-                    ? 'bg-midnight-blue text-white'
-                    : `${tabColors[tab.value]} text-white`
+                  ? 'bg-midnight-blue text-white'
                   : 'bg-input-bg text-gray-600'
               }`}
             >{tab.label}</button>
