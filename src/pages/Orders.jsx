@@ -6,6 +6,27 @@ import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
 import { db, ref, onValue, update } from '../services/firebase'
 
+const filterTabs = [
+  { value: 'all', label: 'All' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'confirmed', label: 'Confirmed' },
+  { value: 'preparing', label: 'Preparing' },
+  { value: 'on_delivery', label: 'On Delivery' },
+  { value: 'ready', label: 'Ready' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+]
+
+const tabColors = {
+  pending: 'bg-yellow-500',
+  confirmed: 'bg-blue-500',
+  preparing: 'bg-indigo-500',
+  on_delivery: 'bg-orange-500',
+  ready: 'bg-teal-500',
+  completed: 'bg-green-500',
+  cancelled: 'bg-red-500',
+}
+
 export default function Orders() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -14,6 +35,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [stationStatuses, setStationStatuses] = useState({})
   const [cancellingId, setCancellingId] = useState(null)
+  const [filterStatus, setFilterStatus] = useState('all')
 
   useEffect(() => {
     if (!user) return
@@ -82,6 +104,10 @@ export default function Orders() {
     setCancellingId(null)
   }
 
+  const filteredOrders = filterStatus === 'all'
+    ? orders
+    : orders.filter((o) => (o.status || '').toLowerCase() === filterStatus)
+
   if (selectedOrder) {
     const selStatus = (selectedOrder.status || '').toLowerCase()
     const canCancel = selStatus === 'pending' || selStatus === 'confirmed'
@@ -111,6 +137,23 @@ export default function Orders() {
         <button onClick={() => navigate('/maps')} className="text-white text-xl">&#x2190;</button>
         <h1 className="text-lg font-bold">My Orders</h1>
       </div>
+      {!loading && orders.length > 0 && (
+        <div className="flex gap-1.5 px-4 py-2 overflow-x-auto shrink-0 [&::-webkit-scrollbar]:hidden">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setFilterStatus(tab.value)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                filterStatus === tab.value
+                  ? tab.value === 'all'
+                    ? 'bg-midnight-blue text-white'
+                    : `${tabColors[tab.value]} text-white`
+                  : 'bg-input-bg text-gray-600'
+              }`}
+            >{tab.label}</button>
+          ))}
+        </div>
+      )}
       <div className="flex-1 p-4 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
@@ -120,8 +163,13 @@ export default function Orders() {
             <p className="text-sm mb-6 text-center">Locate a water station near you and place your first order!</p>
             <button onClick={() => navigate('/maps')} className="btn-primary">Find Water Stations</button>
           </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <p className="text-lg font-bold text-midnight-blue mb-2">No {filterTabs.find(t => t.value === filterStatus)?.label || ''} Orders</p>
+            <p className="text-sm text-center">No orders match this status.</p>
+          </div>
         ) : (
-          orders.map((order) => (
+          filteredOrders.map((order) => (
             <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
           ))
         )}
