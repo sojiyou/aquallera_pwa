@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { WheelPicker, WheelPickerWrapper } from '@ncdai/react-wheel-picker'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
 import { auth, db, ref, onValue, get, child, sendEmailVerification } from '../services/firebase'
@@ -26,9 +25,6 @@ export default function CreateOrder() {
   const [addressSearch, setAddressSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
-  const [pickupHour, setPickupHour] = useState(8)
-  const [pickupMinute, setPickupMinute] = useState(0)
-  const [pickupMeridiem, setPickupMeridiem] = useState('AM')
   const searchContainerRef = useRef(null)
 
   useEffect(() => {
@@ -230,79 +226,47 @@ export default function CreateOrder() {
     }
   }
 
-  const parse12h = (s) => {
-    const m = s.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
-    if (!m) return null
-    return { h: +m[1], m: +m[2], p: m[3].toUpperCase() }
-  }
-
-  const to24h = (h, p) => {
-    if (p === 'AM') return h === 12 ? 0 : h
-    return h === 12 ? 12 : h + 12
-  }
-
-  const getBounds = (station, dateStr) => {
-    if (!station?.businessHours || !dateStr) return null
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
-    const dayName = days[new Date(dateStr + 'T00:00:00').getDay()]
-    const hStr = station.businessHours[dayName]
-    if (!hStr) return null
-    const [o, c] = hStr.split(' - ')
-    const op = parse12h(o), cl = parse12h(c)
-    if (!op || !cl) return null
-    return {
-      open: { ...op, h24: to24h(op.h, op.p) },
-      close: { ...cl, h24: to24h(cl.h, cl.p) }
+  const pickupTimeSlots = useMemo(() => {
+    const to24 = (h, p) => {
+      if (p === 'AM') return h === 12 ? 0 : h
+      return h === 12 ? 12 : h + 12
     }
-  }
-
-  const pickupTimeMeta = useMemo(() => {
-    const bounds = getBounds(station, preferredDate)
-    const minOpts = [{ label: '00', value: 0 }, { label: '30', value: 30 }]
-
-    if (!bounds) {
-      const hours = Array.from({ length: 12 }, (_, i) => ({
-        label: String(i + 1).padStart(2, '0'), value: i + 1
-      }))
-      return { hours, minutes: minOpts, meridiems: [{ label: 'AM', value: 'AM' }, { label: 'PM', value: 'PM' }] }
+    const parse = (s) => {
+      const m = s.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
+      return m ? { h: +m[1], m: +m[2], p: m[3].toUpperCase() } : null
     }
 
-    const { open, close } = bounds
-    const openTotal = open.h24 + open.m / 60
-    const closeTotal = close.h24 + close.m / 60
+    let openH = 6, openM = 0, closeH = 21, closeM = 0
+    let hoursStr = null
 
-    const hours = []
-    const meridiems = []
-    const seenM = new Set()
-
-    for (let h = 1; h <= 12; h++) {
-      const am24 = to24h(h, 'AM')
-      const pm24 = to24h(h, 'PM')
-      const amValid = am24 >= openTotal && am24 < closeTotal
-      const pmValid = pm24 >= openTotal && pm24 < closeTotal
-
-      if (amValid || pmValid) hours.push({ label: String(h).padStart(2, '0'), value: h })
-      if (amValid && !seenM.has('AM')) { meridiems.push({ label: 'AM', value: 'AM' }); seenM.add('AM') }
-      if (pmValid && !seenM.has('PM')) { meridiems.push({ label: 'PM', value: 'PM' }); seenM.add('PM') }
+    if (station?.businessHours && preferredDate) {
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+      const dayName = days[new Date(preferredDate + 'T00:00:00').getDay()]
+      const hStr = station.businessHours[dayName]
+      if (hStr) {
+        const [o, c] = hStr.split(' - ')
+        const op = parse(o), cl = parse(c)
+        if (op && cl) {
+          openH = to24(op.h, op.p); openM = op.m
+          closeH = to24(cl.h, cl.p); closeM = cl.m
+          hoursStr = `${op.h}:${String(op.m).padStart(2, '0')} ${op.p} - ${cl.h}:${String(cl.m).padStart(2, '0')} ${cl.p}`
+        }
+      }
     }
 
-    return { hours, minutes: minOpts, meridiems }
+    const slots = []
+    let h = openH, m = openM
+    while (h < closeH || (h === closeH && m < closeM)) {
+      const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      const hour12 = h === 0 ? 12 : (h > 12 ? h - 12 : h)
+      const period = h < 12 ? 'AM' : 'PM'
+      const display = `${hour12}:${String(m).padStart(2, '0')} ${period}`
+      slots.push({ display, value })
+      m += 30
+      if (m >= 60) { h++; m = 0 }
+    }
+    return { slots, hoursStr }
   }, [station, preferredDate])
-
-  useEffect(() => {
-    if (!pickupTimeMeta.hours.length) return
-    const validHours = pickupTimeMeta.hours.map(o => o.value)
-    if (!validHours.includes(pickupHour)) setPickupHour(validHours[0])
-    const validMeridiems = pickupTimeMeta.meridiems.map(o => o.value)
-    if (!validMeridiems.includes(pickupMeridiem)) setPickupMeridiem(validMeridiems[0])
-  }, [pickupTimeMeta])
-
-  useEffect(() => {
-    if (orderType !== 'Pickup') return
-    if (pickupTimeMeta.hours.length === 0) return
-    const h24 = to24h(pickupHour, pickupMeridiem)
-    setPreferredTime(`${String(h24).padStart(2, '0')}:${String(pickupMinute).padStart(2, '0')}`)
-  }, [pickupHour, pickupMinute, pickupMeridiem, orderType, pickupTimeMeta])
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -497,43 +461,22 @@ export default function CreateOrder() {
           </div>
         )}
 
-        {preferredDate && orderType === 'Pickup' && pickupTimeMeta.hours.length > 0 && (
+        {preferredDate && orderType === 'Pickup' && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
-            <div className="flex justify-center gap-1">
-              <WheelPickerWrapper>
-                <WheelPicker
-                  options={pickupTimeMeta.hours}
-                  value={pickupHour}
-                  onValueChange={setPickupHour}
-                  visibleCount={5}
-                  optionItemHeight={36}
-                  infinite
-                />
-              </WheelPickerWrapper>
-              <span className="flex items-center text-lg font-bold text-midnight-blue self-center">:</span>
-              <WheelPickerWrapper>
-                <WheelPicker
-                  options={pickupTimeMeta.minutes}
-                  value={pickupMinute}
-                  onValueChange={setPickupMinute}
-                  visibleCount={5}
-                  optionItemHeight={36}
-                  infinite
-                />
-              </WheelPickerWrapper>
-              {pickupTimeMeta.meridiems.length > 1 && (
-                <WheelPickerWrapper>
-                  <WheelPicker
-                    options={pickupTimeMeta.meridiems}
-                    value={pickupMeridiem}
-                    onValueChange={setPickupMeridiem}
-                    visibleCount={5}
-                    optionItemHeight={36}
-                  />
-                </WheelPickerWrapper>
-              )}
-            </div>
+            <select
+              value={preferredTime}
+              onChange={(e) => setPreferredTime(e.target.value)}
+              className="input-field w-full"
+            >
+              <option value="" disabled>Select time</option>
+              {pickupTimeSlots.slots.map((slot) => (
+                <option key={slot.value} value={slot.value}>{slot.display}</option>
+              ))}
+            </select>
+            {pickupTimeSlots.hoursStr && (
+              <p className="text-xs text-gray-500 mt-1">Station hours: {pickupTimeSlots.hoursStr}</p>
+            )}
           </div>
         )}
 
