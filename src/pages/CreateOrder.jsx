@@ -26,6 +26,9 @@ export default function CreateOrder() {
   const [addressSearch, setAddressSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
+  const [pickupHour, setPickupHour] = useState(8)
+  const [pickupMinute, setPickupMinute] = useState(0)
+  const [pickupMeridiem, setPickupMeridiem] = useState('AM')
   const searchContainerRef = useRef(null)
 
   useEffect(() => {
@@ -227,18 +230,79 @@ export default function CreateOrder() {
     }
   }
 
-  const timeOptions = useMemo(() => {
-    const times = []
-    for (let h = 6; h <= 21; h++) {
-      times.push(`${String(h).padStart(2, '0')}:00`)
-      if (h < 21) times.push(`${String(h).padStart(2, '0')}:30`)
-    }
-    return times
-  }, [])
+  const parse12h = (s) => {
+    const m = s.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
+    if (!m) return null
+    return { h: +m[1], m: +m[2], p: m[3].toUpperCase() }
+  }
 
-  const wheelPickerOptions = useMemo(() =>
-    timeOptions.map(t => ({ label: to12Hour(t), value: t })),
-  [timeOptions])
+  const to24h = (h, p) => {
+    if (p === 'AM') return h === 12 ? 0 : h
+    return h === 12 ? 12 : h + 12
+  }
+
+  const getBounds = (station, dateStr) => {
+    if (!station?.businessHours || !dateStr) return null
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    const dayName = days[new Date(dateStr + 'T00:00:00').getDay()]
+    const hStr = station.businessHours[dayName]
+    if (!hStr) return null
+    const [o, c] = hStr.split(' - ')
+    const op = parse12h(o), cl = parse12h(c)
+    if (!op || !cl) return null
+    return {
+      open: { ...op, h24: to24h(op.h, op.p) },
+      close: { ...cl, h24: to24h(cl.h, cl.p) }
+    }
+  }
+
+  const pickupTimeMeta = useMemo(() => {
+    const bounds = getBounds(station, preferredDate)
+    const minOpts = [{ label: '00', value: 0 }, { label: '30', value: 30 }]
+
+    if (!bounds) {
+      const hours = Array.from({ length: 12 }, (_, i) => ({
+        label: String(i + 1).padStart(2, '0'), value: i + 1
+      }))
+      return { hours, minutes: minOpts, meridiems: [{ label: 'AM', value: 'AM' }, { label: 'PM', value: 'PM' }] }
+    }
+
+    const { open, close } = bounds
+    const openTotal = open.h24 + open.m / 60
+    const closeTotal = close.h24 + close.m / 60
+
+    const hours = []
+    const meridiems = []
+    const seenM = new Set()
+
+    for (let h = 1; h <= 12; h++) {
+      const am24 = to24h(h, 'AM')
+      const pm24 = to24h(h, 'PM')
+      const amValid = am24 >= openTotal && am24 < closeTotal
+      const pmValid = pm24 >= openTotal && pm24 < closeTotal
+
+      if (amValid || pmValid) hours.push({ label: String(h).padStart(2, '0'), value: h })
+      if (amValid && !seenM.has('AM')) { meridiems.push({ label: 'AM', value: 'AM' }); seenM.add('AM') }
+      if (pmValid && !seenM.has('PM')) { meridiems.push({ label: 'PM', value: 'PM' }); seenM.add('PM') }
+    }
+
+    return { hours, minutes: minOpts, meridiems }
+  }, [station, preferredDate])
+
+  useEffect(() => {
+    if (!pickupTimeMeta.hours.length) return
+    const validHours = pickupTimeMeta.hours.map(o => o.value)
+    if (!validHours.includes(pickupHour)) setPickupHour(validHours[0])
+    const validMeridiems = pickupTimeMeta.meridiems.map(o => o.value)
+    if (!validMeridiems.includes(pickupMeridiem)) setPickupMeridiem(validMeridiems[0])
+  }, [pickupTimeMeta])
+
+  useEffect(() => {
+    if (orderType !== 'Pickup') return
+    if (pickupTimeMeta.hours.length === 0) return
+    const h24 = to24h(pickupHour, pickupMeridiem)
+    setPreferredTime(`${String(h24).padStart(2, '0')}:${String(pickupMinute).padStart(2, '0')}`)
+  }, [pickupHour, pickupMinute, pickupMeridiem, orderType, pickupTimeMeta])
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -431,19 +495,42 @@ export default function CreateOrder() {
           </div>
         )}
 
-        {preferredDate && orderType === 'Pickup' && (
+        {preferredDate && orderType === 'Pickup' && pickupTimeMeta.hours.length > 0 && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-1">
               <WheelPickerWrapper>
                 <WheelPicker
-                  options={wheelPickerOptions}
-                  value={preferredTime}
-                  onValueChange={setPreferredTime}
+                  options={pickupTimeMeta.hours}
+                  value={pickupHour}
+                  onValueChange={setPickupHour}
                   visibleCount={5}
                   optionItemHeight={36}
+                  infinite
                 />
               </WheelPickerWrapper>
+              <span className="flex items-center text-lg font-bold text-midnight-blue self-center">:</span>
+              <WheelPickerWrapper>
+                <WheelPicker
+                  options={pickupTimeMeta.minutes}
+                  value={pickupMinute}
+                  onValueChange={setPickupMinute}
+                  visibleCount={5}
+                  optionItemHeight={36}
+                  infinite
+                />
+              </WheelPickerWrapper>
+              {pickupTimeMeta.meridiems.length > 1 && (
+                <WheelPickerWrapper>
+                  <WheelPicker
+                    options={pickupTimeMeta.meridiems}
+                    value={pickupMeridiem}
+                    onValueChange={setPickupMeridiem}
+                    visibleCount={5}
+                    optionItemHeight={36}
+                  />
+                </WheelPickerWrapper>
+              )}
             </div>
           </div>
         )}
