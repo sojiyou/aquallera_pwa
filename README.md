@@ -48,9 +48,10 @@ aquallera-pwa/
 │   │   ├── errors.js         # getFirebaseErrorMessage — user-friendly Firebase auth error codes
 │   │   └── formatTime.js     # to12Hour — converts 24h "14:30" → "2:30 PM"
 │   ├── components/
-│   │   ├── Footer.jsx        # Social links, contact info (used in Landing/Login/Signup)
+│   │   ├── Footer.jsx        # Social links, contact info, globe icon links to aquallera website (used in Landing/Login/Signup)
 │   │   ├── BottomNav.jsx     # 3-tab nav: Map | Orders | Profile
 │   │   ├── WaterStationCard.jsx  # Station card with status, pricing, distance, actions
+│   │   ├── FloatingInput.jsx     # Floating label input with show/hide password toggle
 │   │   ├── OrderTicketItem.jsx   # Order list card with status badge, ref#, total, revoked banner
 │   │   ├── OrderReceipt.jsx      # Shared receipt-style order detail component
 │   │   └── HowToOrderDialog.jsx  # 5-step modal dialog
