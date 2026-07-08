@@ -536,7 +536,27 @@ The admin website is at `~/Desktop/Github/aquallera_web`. Key files:
 - [ ] Build/compile on Android Studio to verify no resource errors
 - [ ] Generate signed APK for submission
 
-## TODO / Known Gaps
+---
+
+## Vercel Deployment
+
+The project is configured for Vercel via `vercel.json`:
+
+- **Framework:** Vite (auto-detected)
+- **Build:** `npm run build` → output to `dist/`
+- **SPA routing:** All routes rewrite to `/index.html` for React Router
+- **Node version:** `>=18` (set via `engines` in `package.json`)
+- **Env vars:** Set all `VITE_*` variables from `.env` in Vercel dashboard
+
+---
+
+## Mobile Layout
+
+All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` (`100vh`) to account for mobile browser chrome. The BottomNav includes `safe-area-inset-bottom` padding for notched phones.
+
+---
+
+## Known Gaps
 
 1. **Firebase rules** — Add `.indexOn: ["number", "email"]` to `users` and `.indexOn: "email"` to `waterStations` for signup duplicate checks (currently only works if indexes exist or dataset is small)
 2. **Admin website email verification** — Station owner signup on `aquallera_web` does not send `sendEmailVerification`, and login does not check `emailVerified`. Should be added for consistency.

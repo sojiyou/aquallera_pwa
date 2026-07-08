@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
@@ -226,6 +226,50 @@ export default function CreateOrder() {
     }
   }
 
+  const timeOptions = useMemo(() => {
+    const times = []
+    for (let h = 6; h <= 21; h++) {
+      times.push(`${String(h).padStart(2, '0')}:00`)
+      if (h < 21) times.push(`${String(h).padStart(2, '0')}:30`)
+    }
+    return times
+  }, [])
+
+  const pickerRef = useRef(null)
+  const scrollTimer = useRef(null)
+
+  const getCenterTime = useCallback(() => {
+    const el = pickerRef.current
+    if (!el) return null
+    const items = el.querySelectorAll('[data-time]')
+    let closest = null
+    let closestDist = Infinity
+    const center = el.scrollTop + el.clientHeight / 2
+    items.forEach((item) => {
+      const dist = Math.abs(item.offsetTop + item.offsetHeight / 2 - center)
+      if (dist < closestDist) { closestDist = dist; closest = item.dataset.time }
+    })
+    return closest
+  }, [])
+
+  const handleScroll = useCallback(() => {
+    if (scrollTimer.current) clearTimeout(scrollTimer.current)
+    scrollTimer.current = setTimeout(() => {
+      const t = getCenterTime()
+      if (t) setPreferredTime(t)
+    }, 120)
+  }, [getCenterTime])
+
+  const scrollToTime = useCallback((t) => {
+    setPreferredTime(t)
+    const el = pickerRef.current
+    if (!el) return
+    const idx = timeOptions.indexOf(t)
+    if (idx === -1) return
+    const item = el.querySelector(`[data-time="${t}"]`)
+    if (item) item.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, [timeOptions])
+
   const today = new Date().toISOString().split('T')[0]
 
   if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
@@ -391,7 +435,7 @@ export default function CreateOrder() {
           />
         </div>
 
-        {preferredDate && orderType === 'Delivery' && station?.deliveryHours?.length > 0 && (
+        {preferredDate && orderType === 'Delivery' && station && station.deliveryHours && station.deliveryHours.length > 0 && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Delivery Time</h2>
             <p className="text-xs text-gray-500 mb-2">Select a delivery time slot</p>
@@ -415,12 +459,29 @@ export default function CreateOrder() {
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
             <p className="text-xs text-gray-500 mb-2">Select a pickup time</p>
-            <input
-              type="time"
-              value={preferredTime}
-              onChange={(e) => setPreferredTime(e.target.value)}
-              className="input-field w-full [color-scheme:light]"
-            />
+            <div className="relative w-full">
+              <div className="absolute top-1/2 left-2 right-2 h-11 -translate-y-1/2 rounded-lg bg-midnight-blue/10 pointer-events-none z-10" />
+              <div
+                ref={pickerRef}
+                onScroll={handleScroll}
+                className="relative w-full h-44 overflow-y-auto rounded-lg bg-[#D9D9D9] [&::-webkit-scrollbar]:hidden"
+              >
+                <div style={{ height: 66 }} className="shrink-0" />
+                {timeOptions.map((t) => (
+                  <div
+                    key={t}
+                    data-time={t}
+                    onClick={() => scrollToTime(t)}
+                    className={`h-11 flex items-center justify-center text-sm font-medium transition-colors cursor-pointer select-none ${
+                      preferredTime === t
+                        ? 'bg-midnight-blue text-white font-bold'
+                        : 'text-gray-600'
+                    }`}
+                  >{to12Hour(t)}</div>
+                ))}
+                <div style={{ height: 66 }} className="shrink-0" />
+              </div>
+            </div>
           </div>
         )}
 
