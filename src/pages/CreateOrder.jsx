@@ -397,10 +397,10 @@ export default function CreateOrder() {
           </label>
         </div>
 
-        {preferredDate && station?.deliveryHours?.length > 0 && (
+        {preferredDate && orderType === 'Delivery' && station?.deliveryHours?.length > 0 && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">{orderType} Time</h2>
-            <p className="text-xs text-gray-500 mb-2">Select a time slot</p>
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Time</h2>
+            <p className="text-xs text-gray-500 mb-2">Select a delivery time slot</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {station.deliveryHours.map((time) => (
                 <button
@@ -414,6 +414,25 @@ export default function CreateOrder() {
                 >{to12Hour(time)}</button>
               ))}
             </div>
+          </div>
+        )}
+
+        {preferredDate && orderType === 'Pickup' && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
+            <p className="text-xs text-gray-500 mb-2">Select a pickup time</p>
+            <label className="relative flex items-center w-full h-14 px-4 rounded-lg bg-[#D9D9D9] cursor-pointer active:scale-[0.98] transition-transform">
+              <svg className="w-5 h-5 mr-2 text-midnight-blue/60 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+              <span className={`flex-1 text-base ${preferredTime ? 'text-midnight-blue font-medium' : 'text-gray-500'}`}>
+                {preferredTime ? to12Hour(preferredTime) : 'Select a time'}
+              </span>
+              <input
+                type="time"
+                value={preferredTime}
+                onChange={(e) => setPreferredTime(e.target.value)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </label>
           </div>
         )}
 
