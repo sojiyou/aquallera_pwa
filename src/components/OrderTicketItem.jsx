@@ -1,9 +1,9 @@
 const statusColors = {
   pending: 'bg-yellow-500',
-  confirmed: 'bg-blue-500',
-  preparing: 'bg-indigo-500',
-  on_delivery: 'bg-orange-500',
-  ready: 'bg-teal-500',
+  confirmed: 'bg-blue-400',
+  preparing: 'bg-blue-500',
+  on_delivery: 'bg-blue-600',
+  ready: 'bg-blue-700',
   delivered: 'bg-green-500',
   completed: 'bg-green-500',
   cancelled: 'bg-red-500',
