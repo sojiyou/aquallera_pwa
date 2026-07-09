@@ -64,7 +64,7 @@ aquallera-pwa/
 │       ├── About.jsx         # "What is Aqua-llera", "Why make Aquallera", "How to Order"
 │       ├── Maps.jsx          # Mapbox map + station markers + user location button + station list
 │       ├── StoreDetails.jsx  # Station details: hours, delivery hours, services, prices, about
-│   ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + native time slot picker
+│   ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + available date buttons (based on station's deliveryDays)
 │       ├── OrderConfirmation.jsx  # Receipt-style confirm + save to Firebase + email
 │       ├── OrderSuccess.jsx  # Success page with order details
 │   ├── Orders.jsx        # Orders list with status filter tabs, detail view with receipt + cancel, revoked handling
