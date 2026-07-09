@@ -9,6 +9,17 @@ const statusColors = {
   cancelled: '#ef4444',
 }
 
+const statusLabels = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  preparing: 'Preparing',
+  on_delivery: 'For Delivery',
+  ready: 'For Pickup',
+  delivered: 'Delivered',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+}
+
 export default function OrderTicketItem({ order, revoked, onClick }) {
   const status = (order.status || 'pending').toLowerCase()
   const date = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A')
@@ -31,7 +42,7 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
         className="inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2"
         style={{ backgroundColor: statusColors[status] || '#eab308' }}
       >
-        {order.status || 'Pending'}
+        {statusLabels[status] || order.status || 'Pending'}
       </span>
       <hr className="border-midnight-blue my-1" />
       <p className="text-midnight-blue text-sm">Date: {date}</p>
