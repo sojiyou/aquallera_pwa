@@ -269,6 +269,30 @@ export default function CreateOrder() {
     return { slots, hoursStr }
   }, [station, preferredDate])
 
+  const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+  const formatDateDisplay = (dateStr) => {
+    const d = new Date(dateStr + 'T00:00:00')
+    const dayName = dayMap[d.getDay()]
+    const month = d.toLocaleString('en-US', { month: 'short' })
+    const day = d.getDate()
+    return `${dayName.charAt(0).toUpperCase() + dayName.slice(1, 3)}, ${month} ${day}`
+  }
+
+  const availableDates = useMemo(() => {
+    if (!station?.deliveryDays || station.deliveryDays.length === 0) return []
+    const results = []
+    let date = new Date(today + 'T00:00:00')
+    for (let i = 0; i < 60 && results.length < 14; i++) {
+      const dayName = dayMap[date.getDay()]
+      if (station.deliveryDays.includes(dayName)) {
+        results.push(date.toISOString().split('T')[0])
+      }
+      date.setDate(date.getDate() + 1)
+    }
+    return results
+  }, [station?.deliveryDays])
+
   if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
 
@@ -423,21 +447,43 @@ export default function CreateOrder() {
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">Preferred Date</h2>
-          <div className="relative">
-            <div className="input-field w-full flex items-center gap-2 pointer-events-none">
-              <svg className="w-5 h-5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className={preferredDate ? 'text-gray-800' : 'text-gray-400'}>{preferredDate || 'Select date'}</span>
+          {orderType === 'Delivery' && station?.deliveryDays?.length > 0 ? (
+            <>
+              <p className="text-xs text-gray-500 mb-2">Select a delivery date</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {availableDates.map(dateStr => (
+                  <button
+                    key={dateStr}
+                    onClick={() => setPreferredDate(dateStr)}
+                    className={`h-11 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
+                      preferredDate === dateStr
+                        ? 'bg-midnight-blue text-white'
+                        : 'bg-input-bg text-gray-600 active:bg-gray-300'
+                    }`}
+                  >{formatDateDisplay(dateStr)}</button>
+                ))}
+              </div>
+              {availableDates.length === 0 && (
+                <p className="text-xs text-gray-500">No available delivery dates at this time.</p>
+              )}
+            </>
+          ) : (
+            <div className="relative">
+              <div className="input-field w-full flex items-center gap-2 pointer-events-none">
+                <svg className="w-5 h-5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className={preferredDate ? 'text-gray-800' : 'text-gray-400'}>{preferredDate || 'Select date'}</span>
+              </div>
+              <input
+                type="date"
+                value={preferredDate}
+                onChange={(e) => setPreferredDate(e.target.value)}
+                min={today}
+                className="absolute inset-0 opacity-0"
+              />
             </div>
-            <input
-              type="date"
-              value={preferredDate}
-              onChange={(e) => setPreferredDate(e.target.value)}
-              min={today}
-              className="absolute inset-0 opacity-0"
-            />
-          </div>
+          )}
         </div>
 
         {orderType === 'Delivery' && station && station.deliveryHours && station.deliveryHours.length > 0 && (
