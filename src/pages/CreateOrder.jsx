@@ -19,7 +19,8 @@ export default function CreateOrder() {
   const [userAddress, setUserAddress] = useState('')
   const [deliveryInstructions, setDeliveryInstructions] = useState('')
   const [location, setLocation] = useState(null)
-  const [preferredDate, setPreferredDate] = useState('')
+  const today = new Date().toISOString().split('T')[0]
+  const [preferredDate, setPreferredDate] = useState(today)
   const [preferredTime, setPreferredTime] = useState('')
   const [showPreview, setShowPreview] = useState(false)
   const [addressSearch, setAddressSearch] = useState('')
@@ -268,8 +269,6 @@ export default function CreateOrder() {
     return { slots, hoursStr }
   }, [station, preferredDate])
 
-  const today = new Date().toISOString().split('T')[0]
-
   if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
 
@@ -441,7 +440,7 @@ export default function CreateOrder() {
           </div>
         </div>
 
-        {preferredDate && orderType === 'Delivery' && station && station.deliveryHours && station.deliveryHours.length > 0 && (
+        {orderType === 'Delivery' && station && station.deliveryHours && station.deliveryHours.length > 0 && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Delivery Time</h2>
             <p className="text-xs text-gray-500 mb-2">Select a delivery time slot</p>
@@ -461,7 +460,7 @@ export default function CreateOrder() {
           </div>
         )}
 
-        {preferredDate && orderType === 'Pickup' && (
+        {orderType === 'Pickup' && (
           <div className="card">
             <h2 className="font-bold text-midnight-blue mb-2">Pickup Time</h2>
             <select
