@@ -1,12 +1,12 @@
 const statusColors = {
-  pending: 'bg-yellow-500',
-  confirmed: 'bg-blue-400',
-  preparing: 'bg-blue-500',
-  on_delivery: 'bg-blue-600',
-  ready: 'bg-blue-700',
-  delivered: 'bg-green-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-red-500',
+  pending: '#eab308',
+  confirmed: '#60a5fa',
+  preparing: '#3b82f6',
+  on_delivery: '#2563eb',
+  ready: '#1d4ed8',
+  delivered: '#22c55e',
+  completed: '#22c55e',
+  cancelled: '#ef4444',
 }
 
 export default function OrderTicketItem({ order, revoked, onClick }) {
@@ -27,7 +27,10 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
         </div>
       )}
       <h3 className="font-bold text-midnight-blue text-lg mb-1">{order.stationName || 'Unknown Station'}</h3>
-      <span className={`inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2 ${statusColors[status] || 'bg-yellow-500'}`}>
+      <span
+        className="inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2"
+        style={{ backgroundColor: statusColors[status] || '#eab308' }}
+      >
         {order.status || 'Pending'}
       </span>
       <hr className="border-midnight-blue my-1" />
