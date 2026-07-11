@@ -95,7 +95,7 @@ Currently only **Cash on Delivery** is supported.
 - **Data model:** The `paymentMethod` field is part of every order (defaults to `"Cash on Delivery"`)
 - **Order creation:** `CreateOrder.jsx:110` — hardcoded to `"Cash on Delivery"` for all orders
 - **Receipt display:** `OrderReceipt.jsx` — shows payment method in the order details section
-- **Coming soon indicator:** A pulsing amber dot with "More payment options coming soon" appears on the Create Order page
+- **Coming soon indicator:** A pulsing amber dot with "Pay via Cash on Delivery · More options coming soon" appears on the Create Order page
 
 ### Planned
 

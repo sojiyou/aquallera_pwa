@@ -541,7 +541,7 @@ export default function CreateOrder() {
         <div className="text-center text-xs text-gray-400">
           <span className="inline-flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            More payment options coming soon
+            Pay via Cash on Delivery · More options coming soon
           </span>
         </div>
       </div>
