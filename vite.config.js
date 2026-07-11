@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg', 'icons/*.png'],
+      includeAssets: ['icons/*.svg', 'icons/*.png', 'logo-no-name.png'],
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
       },
