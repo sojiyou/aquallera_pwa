@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -39,6 +39,7 @@ export default function Maps() {
   const [userLocation, setUserLocation] = useState(null)
   const [selectedStation, setSelectedStation] = useState(null)
   const [showHowToOrder, setShowHowToOrder] = useState(false)
+  const [statusFilter, setStatusFilter] = useState('all')
   const [panelHeightPct, setPanelHeightPct] = useState(55)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -311,6 +312,18 @@ export default function Maps() {
     document.addEventListener('touchend', onEnd)
   }
 
+  const filteredStations = useMemo(() => {
+    return stations.filter((s) => {
+      if (statusFilter === 'all') return true
+      const isApproved = s.status === 'approved'
+      const isOnline = s.online || s.isOnline
+      if (statusFilter === 'online') return isApproved && isOnline
+      if (statusFilter === 'offline') return isApproved && !isOnline
+      if (statusFilter === 'pending') return !isApproved
+      return true
+    })
+  }, [stations, statusFilter])
+
   return (
     <div className="h-dvh flex flex-col bg-app-bg">
       <div className="flex items-center gap-3 px-3 py-2 bg-app-bg shrink-0 z-30">
@@ -363,16 +376,26 @@ export default function Maps() {
             <div className="w-10 h-1.5 bg-gray-300 rounded-lg mx-auto" />
           </div>
 
-          <div className="px-4 pb-3 flex-shrink-0">
+          <div className="px-4 pb-3 flex-shrink-0 flex items-center justify-between">
             <h3 className="text-midnight-blue font-bold text-sm">All Water Stations</h3>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="text-xs border border-gray-300 rounded-lg px-2 py-1 bg-white text-gray-700"
+            >
+              <option value="all">All</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+              <option value="pending">Pending</option>
+            </select>
           </div>
 
           <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 space-y-2">
-            {stations.length > 0 ? stations.map((s) => (
+            {filteredStations.length > 0 ? filteredStations.map((s) => (
               <WaterStationCard key={s.id} station={s} userLocation={userLocation} onViewOnMap={handleViewOnMap} />
             )) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <p className="text-sm">No water stations available</p>
+                <p className="text-sm">{stations.length === 0 ? 'No water stations available' : 'No stations match this filter'}</p>
               </div>
             )}
           </div>
