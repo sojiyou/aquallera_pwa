@@ -287,7 +287,7 @@ export default function CreateOrder() {
     for (let i = 0; i < 30 && results.length < 14; i++) {
       const dayName = dayMap[date.getDay()]
       if (station.deliveryDays.includes(dayName)) {
-        results.push(date.toISOString().split('T')[0])
+        results.push(date.toLocaleDateString('en-CA'))
       }
       date.setDate(date.getDate() + 1)
     }
