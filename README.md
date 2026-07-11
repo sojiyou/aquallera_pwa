@@ -76,6 +76,11 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | Jul 11 | `1229256` | Increased card max-width from 320px to 384px |
 | Jul 11 | `045a418` | Adjusted card max-width to 416px |
 | Jul 11 | `d2f7434` | Added "More payment options coming soon" indicator to CreateOrder; added payment method display to order receipt |
+| Jul 11 | `e835363` | Updated payment indicator text to "Pay via Cash on Delivery · More options coming soon" |
+| Jul 11 | `2f21af5` | Business Hours sorting fix — `formatHours` helper sorts by 24h value so opening time always appears first |
+| Jul 11 | `42b8d77` | Business Hours: handle `{ open, close }` format from admin dashboard; single-line display with 12h conversion |
+| Jul 11 | `7ecf1b3` | Business Hours: bold the time range instead of the label |
+| Jul 11 | `bc277e1` | Business Hours: heading and time range on one line, removed inner "Hours" label |
 
 ## Session Log
 
@@ -87,6 +92,7 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | `2026-07-08` | Vercel deployment setup (`vercel.json`, Node engine); responsive mobile layout (`h-dvh`, safe-area-inset-bottom); date/time picker refinements (native inputs, wheel picker, iOS fixes); order status handling (revoked stations, auto-cancel, warning banners, status filter tabs); password toggle; footer globe link; removed emoji icons |
 | `2026-07-09` | SVG icons in bottom navigation; unified order status colors (blue gradient); available delivery date buttons from station deliveryDays; pull-to-refresh prevention; human-readable status labels; Tailwind JIT color fix |
 | `2026-07-11` | Global font size bump (+2px); status filter dropdown in Maps; selected station card moved to top; StoreDetails online/isOnline fix + Delivery Days card; timezone fixes; delivery date dropdown with 30-day lookahead; auto-default nearest delivery date; README reorganization with Session Log; pagination (10→5 per page) with Previous/Next controls; container padding increase; card size reduction; Vite "A" favicon replaced with Aquallera logo; page title updated to "Aquallera: PWA"; splash page "A" icon replaced with logo; PWA install icons regenerated from actual logo; fixed Footer globe link on Login/Signup (pointer-events-none on wave overlay); card compacting (text-sm title, text-xs details, text-base price); card width constrained to 416px max; added payment method display to receipt; added "More payment options coming soon" badge to CreateOrder |
+| `2026-07-11` (2) | Payment indicator text updated to "Pay via Cash on Delivery · More options coming soon"; StoreDetails Business Hours rewritten to handle `{ open, close }` format from admin dashboard — sorts times by 24h value, converts to 12h, displays as single bold line on the heading row |
 
 ## Payment
 
