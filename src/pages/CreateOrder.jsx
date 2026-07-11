@@ -27,6 +27,7 @@ export default function CreateOrder() {
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
   const searchContainerRef = useRef(null)
+  const userPickedDate = useRef(false)
 
   useEffect(() => {
     const stationRef = ref(db, `waterStations/${id}`)
@@ -293,6 +294,12 @@ export default function CreateOrder() {
     return results
   }, [station?.deliveryDays])
 
+  useEffect(() => {
+    if (!userPickedDate.current && availableDates.length > 0 && !availableDates.includes(preferredDate)) {
+      setPreferredDate(availableDates[0])
+    }
+  }, [availableDates])
+
   if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
 
@@ -452,7 +459,10 @@ export default function CreateOrder() {
               <p className="text-xs text-gray-500 mb-2">Select a delivery date</p>
               <select
                 value={preferredDate}
-                onChange={(e) => setPreferredDate(e.target.value)}
+                onChange={(e) => {
+                  userPickedDate.current = true
+                  setPreferredDate(e.target.value)
+                }}
                 className="input-field w-full"
               >
                 <option value="" disabled>Select date</option>
