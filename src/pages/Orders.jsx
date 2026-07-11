@@ -6,6 +6,8 @@ import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
 import { db, ref, onValue, update } from '../services/firebase'
 
+const PAGE_SIZE = 10
+
 const filterTabs = [
   { value: 'all', label: 'All' },
   { value: 'pending', label: 'Pending' },
@@ -26,6 +28,11 @@ export default function Orders() {
   const [stationStatuses, setStationStatuses] = useState({})
   const [cancellingId, setCancellingId] = useState(null)
   const [filterStatus, setFilterStatus] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterStatus])
 
   useEffect(() => {
     if (!user) return
@@ -97,6 +104,8 @@ export default function Orders() {
   const filteredOrders = filterStatus === 'all'
     ? orders
     : orders.filter((o) => (o.status || '').toLowerCase() === filterStatus)
+  const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE)
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   if (selectedOrder) {
     const selStatus = (selectedOrder.status || '').toLowerCase()
@@ -142,7 +151,7 @@ export default function Orders() {
           ))}
         </div>
       )}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 px-5 py-4 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
         ) : orders.length === 0 ? (
@@ -157,9 +166,26 @@ export default function Orders() {
             <p className="text-sm text-center">No orders match this status.</p>
           </div>
         ) : (
-          filteredOrders.map((order) => (
-            <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
-          ))
+          <>
+            {paginatedOrders.map((order) => (
+              <OrderTicketItem key={order.firebaseKey} order={order} revoked={isRevoked(order.stationId)} onClick={() => setSelectedOrder(order)} />
+            ))}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-3 pt-2 pb-4">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg bg-midnight-blue text-white text-xs font-medium disabled:opacity-40"
+                >Previous</button>
+                <span className="text-xs text-gray-600">Page {currentPage} of {totalPages}</span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg bg-midnight-blue text-white text-xs font-medium disabled:opacity-40"
+                >Next</button>
+              </div>
+            )}
+          </>
         )}
       </div>
       <BottomNav />
