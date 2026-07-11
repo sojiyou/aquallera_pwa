@@ -334,7 +334,7 @@ export default function Maps() {
         </button>
 
         {selectedStation && (
-          <div className="absolute bottom-24 left-4 right-4 z-10 pointer-events-none">
+          <div className="absolute top-4 left-4 right-4 z-10 pointer-events-none">
             <div className="bg-white rounded-xl shadow-lg px-4 py-3 pointer-events-auto flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-midnight-blue truncate">{selectedStation.stationName}</p>
