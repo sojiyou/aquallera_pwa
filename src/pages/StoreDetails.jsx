@@ -78,8 +78,8 @@ export default function StoreDetails() {
             if ('open' in bh && 'close' in bh) {
               return (
                 <div className="flex justify-between text-base py-0.5">
-                  <span className="font-bold text-gray-700">Hours</span>
-                  <span className="font-medium text-midnight-blue">{to12Hour(bh.open)} - {to12Hour(bh.close)}</span>
+                  <span className="text-gray-700">Hours</span>
+                  <span className="font-bold text-midnight-blue">{to12Hour(bh.open)} - {to12Hour(bh.close)}</span>
                 </div>
               )
             }
