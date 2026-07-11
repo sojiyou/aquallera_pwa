@@ -79,6 +79,12 @@ export default function OrderReceipt({ order, revoked }) {
             <span className="text-gray-600 text-right max-w-[60%]">{order.locationDetails || order.deliveryAddress}</span>
           </div>
         )}
+        {order.paymentMethod && (
+          <div className="flex justify-between">
+            <span>Payment</span>
+            <span className="text-gray-600">{order.paymentMethod}</span>
+          </div>
+        )}
         {order.date && (
           <div className="flex justify-between">
             <span>Date</span>
