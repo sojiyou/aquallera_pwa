@@ -283,7 +283,7 @@ export default function CreateOrder() {
     if (!station?.deliveryDays || station.deliveryDays.length === 0) return []
     const results = []
     let date = new Date(today + 'T00:00:00')
-    for (let i = 0; i < 60 && results.length < 14; i++) {
+    for (let i = 0; i < 30 && results.length < 14; i++) {
       const dayName = dayMap[date.getDay()]
       if (station.deliveryDays.includes(dayName)) {
         results.push(date.toISOString().split('T')[0])
@@ -450,19 +450,16 @@ export default function CreateOrder() {
           {orderType === 'Delivery' && station?.deliveryDays?.length > 0 ? (
             <>
               <p className="text-xs text-gray-500 mb-2">Select a delivery date</p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              <select
+                value={preferredDate}
+                onChange={(e) => setPreferredDate(e.target.value)}
+                className="input-field w-full"
+              >
+                <option value="" disabled>Select date</option>
                 {availableDates.map(dateStr => (
-                  <button
-                    key={dateStr}
-                    onClick={() => setPreferredDate(dateStr)}
-                    className={`h-11 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
-                      preferredDate === dateStr
-                        ? 'bg-midnight-blue text-white'
-                        : 'bg-input-bg text-gray-600 active:bg-gray-300'
-                    }`}
-                  >{formatDateDisplay(dateStr)}</button>
+                  <option key={dateStr} value={dateStr}>{formatDateDisplay(dateStr)}</option>
                 ))}
-              </div>
+              </select>
               {availableDates.length === 0 && (
                 <p className="text-xs text-gray-500">No available delivery dates at this time.</p>
               )}
