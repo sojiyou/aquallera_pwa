@@ -28,7 +28,7 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-[#ECEFF1] rounded-xl p-2.5 mb-2 cursor-pointer active:scale-[0.98] transition-transform"
+      className="bg-[#ECEFF1] rounded-xl p-2.5 mb-2 max-w-xs mx-auto cursor-pointer active:scale-[0.98] transition-transform"
       role="button"
       tabIndex={0}
     >
