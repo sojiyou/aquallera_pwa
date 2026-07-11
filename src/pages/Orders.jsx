@@ -151,7 +151,7 @@ export default function Orders() {
           ))}
         </div>
       )}
-      <div className="flex-1 px-4 py-5 overflow-y-auto">
+      <div className="flex-1 px-6 py-5 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
         ) : orders.length === 0 ? (

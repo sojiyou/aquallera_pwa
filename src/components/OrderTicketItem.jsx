@@ -28,7 +28,7 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-[#ECEFF1] rounded-xl p-3 mb-2.5 cursor-pointer active:scale-[0.98] transition-transform"
+      className="bg-[#ECEFF1] rounded-xl p-2.5 mb-2 cursor-pointer active:scale-[0.98] transition-transform"
       role="button"
       tabIndex={0}
     >
@@ -37,7 +37,7 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
           <p className="text-red-700 text-xs font-medium">Station no longer active</p>
         </div>
       )}
-      <h3 className="font-bold text-midnight-blue text-base mb-1">{order.stationName || 'Unknown Station'}</h3>
+      <h3 className="font-bold text-midnight-blue text-sm mb-0.5">{order.stationName || 'Unknown Station'}</h3>
       <span
         className="inline-block text-white text-xs px-2 py-0.5 rounded-full mb-2"
         style={{ backgroundColor: statusColors[status] || '#eab308' }}
@@ -45,10 +45,10 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
         {statusLabels[status] || order.status || 'Pending'}
       </span>
       <hr className="border-midnight-blue my-0.5" />
-      <p className="text-midnight-blue text-sm">Date: {date}</p>
-      <p className="text-midnight-blue text-sm">Ref #: {order.referenceNumber || 'N/A'}</p>
-      <p className="text-midnight-blue text-sm">Items: {qty}</p>
-      <p className="text-midnight-blue text-lg font-bold text-right mt-1.5">₱{(order.grandTotal || 0).toFixed(2)}</p>
+      <p className="text-midnight-blue text-xs">Date: {date}</p>
+      <p className="text-midnight-blue text-xs">Ref #: {order.referenceNumber || 'N/A'}</p>
+      <p className="text-midnight-blue text-xs">Items: {qty}</p>
+      <p className="text-midnight-blue text-base font-bold text-right mt-1">₱{(order.grandTotal || 0).toFixed(2)}</p>
     </div>
   )
 }
