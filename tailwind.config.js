@@ -6,6 +6,14 @@ export default {
       fontFamily: {
         sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
+      fontSize: {
+        xs: '14px',
+        sm: '16px',
+        base: '18px',
+        lg: '20px',
+        xl: '22px',
+        '2xl': '26px',
+      },
       colors: {
         midnight: {
           blue: '#191970',

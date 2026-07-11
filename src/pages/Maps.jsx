@@ -332,7 +332,7 @@ export default function Maps() {
           <h1 className="text-midnight-blue font-bold text-lg leading-tight">Aquallera</h1>
           <p className="text-gray-500 italic text-xs">&ldquo;Clean Water, Anytime, Anywhere.&rdquo;</p>
         </div>
-        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[10px] px-2.5 py-1.5 leading-none">How to Order</button>
+        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[12px] px-2.5 py-1.5 leading-none">How to Order</button>
       </div>
 
       <div ref={containerRef} className="flex-1 relative overflow-hidden">
