@@ -537,6 +537,13 @@ export default function CreateOrder() {
           <textarea value={deliveryInstructions} onChange={(e) => setDeliveryInstructions(e.target.value)}
             placeholder="e.g., Leave at gate, landmark, etc." className="input-field min-h-[60px]" />
         </div>
+
+        <div className="text-center text-xs text-gray-400">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            More payment options coming soon
+          </span>
+        </div>
       </div>
 
       <div className="p-4">
