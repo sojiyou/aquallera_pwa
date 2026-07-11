@@ -56,6 +56,7 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 
 | Date | Commit | Changes |
 |------|--------|---------|
+| Jul 11 | `9d48f75` | **Update footer email** — Changed footer contact email from `aquallera@gmail.com` to `aquallera.main@gmail.com` |
 | Jul 11 | `53effab` | Global font size bump — all Tailwind text sizes increased by 2px |
 | Jul 11 | `29f6fa7` | Status filter dropdown (All / Online / Offline / Pending) in Maps station list |
 | Jul 11 | `6002d6c` | Selected station card moved from bottom to top of map |
