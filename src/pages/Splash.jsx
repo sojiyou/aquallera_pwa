@@ -20,9 +20,7 @@ export default function Splash() {
 
   return (
     <div className="h-dvh flex flex-col items-center justify-center bg-app-bg">
-      <div className="w-[200px] h-[200px] rounded-full bg-midnight-blue flex items-center justify-center mb-4">
-        <span className="text-light-yellow text-7xl font-bold">A</span>
-      </div>
+      <img src="/logo-no-name.png" alt="Aquallera" className="w-[180px] h-[180px] object-contain mb-4" />
       <p className="text-gray-500 italic text-base text-center px-4">
         &ldquo;Clean Water, Anytime, Anywhere.&rdquo;
       </p>
