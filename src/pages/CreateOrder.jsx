@@ -19,7 +19,7 @@ export default function CreateOrder() {
   const [userAddress, setUserAddress] = useState('')
   const [deliveryInstructions, setDeliveryInstructions] = useState('')
   const [location, setLocation] = useState(null)
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [preferredDate, setPreferredDate] = useState(today)
   const [preferredTime, setPreferredTime] = useState('')
   const [showPreview, setShowPreview] = useState(false)
