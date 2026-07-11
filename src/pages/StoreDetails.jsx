@@ -36,6 +36,22 @@ export default function StoreDetails() {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const today = days[new Date().getDay()]
 
+  const formatHours = (hoursStr) => {
+    const parts = hoursStr.split(' - ')
+    if (parts.length !== 2) return hoursStr
+    const converted = parts.map(p => to12Hour(p.trim()))
+    const to24 = (t) => {
+      const m = t.match(/(\d+):(\d+)\s*(AM|PM)/i)
+      if (!m) return 0
+      let h = +m[1]
+      if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12
+      if (m[3].toUpperCase() === 'AM' && h === 12) h = 0
+      return h * 60 + +m[2]
+    }
+    converted.sort((a, b) => to24(a) - to24(b))
+    return converted.join(' - ')
+  }
+
   return (
     <div className="min-h-dvh bg-app-bg flex flex-col">
       <div className="bg-midnight-blue text-white p-4">
@@ -60,7 +76,7 @@ export default function StoreDetails() {
           {station.businessHours && Object.entries(station.businessHours).map(([day, hours]) => (
             <div key={day} className="flex justify-between text-sm py-0.5">
               <span className="text-gray-600">{day}</span>
-              <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{to12Hour(hours)}</span>
+              <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{formatHours(hours)}</span>
             </div>
           ))}
         </div>
