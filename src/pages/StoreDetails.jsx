@@ -32,7 +32,7 @@ export default function StoreDetails() {
   )
 
   const isApproved = station.status === 'approved'
-  const isOpen = station.openNow
+  const isOnline = station.online || station.isOnline
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const today = days[new Date().getDay()]
 
@@ -45,8 +45,8 @@ export default function StoreDetails() {
         </div>
         <p className="text-sm ml-8">{station.address || 'Address not available'}</p>
         <div className="flex gap-2 mt-2 ml-8">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOpen ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-            {isOpen ? 'Open' : 'Closed'}
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOnline ? 'bg-green-500' : 'bg-orange-500'} text-white`}>
+            {isOnline ? 'Online' : 'Offline'}
           </span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isApproved ? 'bg-green-500' : 'bg-orange-500'} text-white`}>
             {isApproved ? 'Approved' : 'Pending'}
@@ -88,6 +88,17 @@ export default function StoreDetails() {
             <p className="text-gray-500 text-xs">No services listed</p>
           )}
         </div>
+
+        {station.serviceTypes?.includes('delivery') && station.deliveryDays?.length > 0 && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Days</h2>
+            <div className="flex flex-wrap gap-2">
+              {station.deliveryDays.map((day) => (
+                <span key={day} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full capitalize">{day}</span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {station.serviceTypes?.includes('delivery') && station.deliveryHours?.length > 0 && (
           <div className="card">
