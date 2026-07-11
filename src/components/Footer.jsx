@@ -17,7 +17,7 @@ export default function Footer() {
       <hr className="border-white/30 mb-2" />
       <p className="text-white text-xs mb-1">Contact Us:</p>
       <div className="flex items-center justify-between">
-        <span className="text-white text-[12px]">aquallera@gmail.com</span>
+        <span className="text-white text-[12px]">aquallera.main@gmail.com</span>
         <span className="text-white text-[12px]">2600, Baguio City Philippines</span>
       </div>
       <div className="flex items-center justify-between">
