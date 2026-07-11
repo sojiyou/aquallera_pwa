@@ -72,23 +72,27 @@ export default function StoreDetails() {
 
       <div className="flex-1 p-4 space-y-4">
         <div className="card">
-          <h2 className="font-bold text-midnight-blue mb-2">Business Hours</h2>
           {station.businessHours && (() => {
             const bh = station.businessHours
             if ('open' in bh && 'close' in bh) {
               return (
-                <div className="flex justify-between text-base py-0.5">
-                  <span className="text-gray-700">Hours</span>
+                <div className="flex justify-between text-base">
+                  <span className="font-bold text-midnight-blue">Business Hours</span>
                   <span className="font-bold text-midnight-blue">{to12Hour(bh.open)} - {to12Hour(bh.close)}</span>
                 </div>
               )
             }
-            return Object.entries(bh).map(([day, hrs]) => (
-              <div key={day} className="flex justify-between text-sm py-0.5">
-                <span className="text-gray-600">{day}</span>
-                <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{formatHours(hrs)}</span>
-              </div>
-            ))
+            return (
+              <>
+                <h2 className="font-bold text-midnight-blue mb-2">Business Hours</h2>
+                {Object.entries(bh).map(([day, hrs]) => (
+                  <div key={day} className="flex justify-between text-sm py-0.5">
+                    <span className="text-gray-600">{day}</span>
+                    <span className={`font-medium ${day === today ? 'text-midnight-blue font-bold' : 'text-gray-600'}`}>{formatHours(hrs)}</span>
+                  </div>
+                ))}
+              </>
+            )
           })()}
         </div>
 
