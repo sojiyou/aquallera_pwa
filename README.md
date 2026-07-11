@@ -64,6 +64,12 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | Jul 11 | `64dde5a` | Timezone fix for today — use local time instead of UTC |
 | Jul 11 | `8184ee8` | Auto-default nearest delivery date when none selected |
 | Jul 11 | `2b3aa17` | Delivery date dropdown (select instead of date buttons); 30-day lookahead |
+| Jul 11 | `77add4e` | Reorganized README to match aquallera_web format; added Session Log section |
+| Jul 11 | `d3f1416` | Pagination (10 per page) with Previous/Next controls; increased container padding |
+| Jul 11 | `a1795f7` | Replaced Vite "A" favicon with Aquallera logo mark |
+| Jul 11 | `4f9f907` | Updated page title from "Aqua-llera" to "Aquallera: PWA" |
+| Jul 11 | `f2a7545` | Reduced card sizes (p-4→p-3, text-lg→text-base); more container padding; PAGE_SIZE set to 5 |
+| Jul 11 | `b7fbf13` | Replaced splash page "A" icon with Aquallera logo; regenerated PWA install icons |
 
 ## Session Log
 
@@ -74,11 +80,10 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | `2026-07-07` | Overlapping map layout with draggable bottom sheet (3 snap heights); email verification with auto-polling; Nunito font integration; transaction fee update (₱5); station labels on map; About section rewrites; removed auto-location and Mapbox controls |
 | `2026-07-08` | Vercel deployment setup (`vercel.json`, Node engine); responsive mobile layout (`h-dvh`, safe-area-inset-bottom); date/time picker refinements (native inputs, wheel picker, iOS fixes); order status handling (revoked stations, auto-cancel, warning banners, status filter tabs); password toggle; footer globe link; removed emoji icons |
 | `2026-07-09` | SVG icons in bottom navigation; unified order status colors (blue gradient); available delivery date buttons from station deliveryDays; pull-to-refresh prevention; human-readable status labels; Tailwind JIT color fix |
-| `2026-07-11` | Global font size bump (+2px); status filter dropdown in Maps (All/Online/Offline/Pending); selected station card moved to top; StoreDetails improvements (online/isOnline, Delivery Days card); timezone fixes (en-CA locale); delivery date dropdown with 30-day lookahead; auto-default nearest delivery date |
+| `2026-07-11` | Global font size bump (+2px); status filter dropdown in Maps; selected station card moved to top; StoreDetails online/isOnline fix + Delivery Days card; timezone fixes; delivery date dropdown with 30-day lookahead; auto-default nearest delivery date; README reorganization with Session Log; pagination (10→5 per page) with Previous/Next controls; container padding increase; card size reduction; Vite "A" favicon replaced with Aquallera logo; page title updated to "Aquallera: PWA"; splash page "A" icon replaced with logo; PWA install icons regenerated from actual logo |
 
 ## Known Gaps
 
 1. **Firebase rules** — Add `.indexOn: ["number", "email"]` to `users` and `.indexOn: "email"` to `waterStations` for signup duplicate checks
-2. **PWA icons** — `icon-192x192.png` and `icon-512x512.png` need to be generated/resized from the logo
-3. **Offline support** — Service worker precaches assets but no offline fallback pages are implemented
-4. **Env vars** — Placeholder values in `.env` need to be replaced with real keys before deployment
+2. **Offline support** — Service worker precaches assets but no offline fallback pages are implemented
+3. **Env vars** — Placeholder values in `.env` need to be replaced with real keys before deployment
