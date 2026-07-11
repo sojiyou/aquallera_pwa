@@ -70,6 +70,11 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | Jul 11 | `4f9f907` | Updated page title from "Aqua-llera" to "Aquallera: PWA" |
 | Jul 11 | `f2a7545` | Reduced card sizes (p-4→p-3, text-lg→text-base); more container padding; PAGE_SIZE set to 5 |
 | Jul 11 | `b7fbf13` | Replaced splash page "A" icon with Aquallera logo; regenerated PWA install icons |
+| Jul 11 | `628cc8c` | Fixed Footer globe link not clickable on Login/Signup — added `pointer-events-none` to wave SVG overlay |
+| Jul 11 | `26fb419` | Increased container padding to `px-6`; compacted card sizes (text-sm title, text-xs rows, text-base price) |
+| Jul 11 | `eddbb5a` | Constrained order card width to `max-w-xs` (320px) centered via `mx-auto` |
+| Jul 11 | `1229256` | Increased card max-width from 320px to 384px |
+| Jul 11 | `045a418` | Adjusted card max-width to 416px |
 
 ## Session Log
 
@@ -80,7 +85,7 @@ All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` to account
 | `2026-07-07` | Overlapping map layout with draggable bottom sheet (3 snap heights); email verification with auto-polling; Nunito font integration; transaction fee update (₱5); station labels on map; About section rewrites; removed auto-location and Mapbox controls |
 | `2026-07-08` | Vercel deployment setup (`vercel.json`, Node engine); responsive mobile layout (`h-dvh`, safe-area-inset-bottom); date/time picker refinements (native inputs, wheel picker, iOS fixes); order status handling (revoked stations, auto-cancel, warning banners, status filter tabs); password toggle; footer globe link; removed emoji icons |
 | `2026-07-09` | SVG icons in bottom navigation; unified order status colors (blue gradient); available delivery date buttons from station deliveryDays; pull-to-refresh prevention; human-readable status labels; Tailwind JIT color fix |
-| `2026-07-11` | Global font size bump (+2px); status filter dropdown in Maps; selected station card moved to top; StoreDetails online/isOnline fix + Delivery Days card; timezone fixes; delivery date dropdown with 30-day lookahead; auto-default nearest delivery date; README reorganization with Session Log; pagination (10→5 per page) with Previous/Next controls; container padding increase; card size reduction; Vite "A" favicon replaced with Aquallera logo; page title updated to "Aquallera: PWA"; splash page "A" icon replaced with logo; PWA install icons regenerated from actual logo |
+| `2026-07-11` | Global font size bump (+2px); status filter dropdown in Maps; selected station card moved to top; StoreDetails online/isOnline fix + Delivery Days card; timezone fixes; delivery date dropdown with 30-day lookahead; auto-default nearest delivery date; README reorganization with Session Log; pagination (10→5 per page) with Previous/Next controls; container padding increase; card size reduction; Vite "A" favicon replaced with Aquallera logo; page title updated to "Aquallera: PWA"; splash page "A" icon replaced with logo; PWA install icons regenerated from actual logo; fixed Footer globe link on Login/Signup (pointer-events-none on wave overlay); card compacting (text-sm title, text-xs details, text-base price); card width constrained to 416px max |
 
 ## Known Gaps
 
