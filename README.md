@@ -62,8 +62,8 @@ aquallera-pwa/
 │       ├── Signup.jsx        # Duplicate phone+email checks, createUser, sendEmailVerification, gradient wave bg
 │       ├── VerifyEmail.jsx   # Full-page email verification blocker with auto-polling every 5s
 │       ├── About.jsx         # "What is Aqua-llera", "Why make Aquallera", "How to Order"
-│       ├── Maps.jsx          # Mapbox map + station markers + user location button + station list
-│       ├── StoreDetails.jsx  # Station details: hours, delivery hours, services, prices, about
+│   ├── Maps.jsx          # Mapbox map + station markers + user location button + station list with status filter
+│   ├── StoreDetails.jsx  # Station details: hours, delivery days/hours, services, prices, about, Online/Offline status
 │   ├── CreateOrder.jsx   # Water type + qty + Delivery/Pickup + address autocomplete + available date buttons (based on station's deliveryDays)
 │       ├── OrderConfirmation.jsx  # Receipt-style confirm + save to Firebase + email
 │       ├── OrderSuccess.jsx  # Success page with order details
@@ -554,6 +554,21 @@ The project is configured for Vercel via `vercel.json`:
 ## Mobile Layout
 
 All pages use `h-dvh` (dynamic viewport height) instead of `h-screen` (`100vh`) to account for mobile browser chrome. The BottomNav includes `safe-area-inset-bottom` padding for notched phones.
+
+---
+
+## Recent Changes
+
+| Date | Commit | Changes |
+|------|--------|---------|
+| Jul 11 | `53effab` | **Global font size bump** — All Tailwind text sizes increased by 2px via `tailwind.config.js` override; `text-[10px]` bumped to `text-[12px]` in BottomNav, Footer, Maps |
+| Jul 11 | `29f6fa7` | **Status filter** — Added dropdown (All / Online / Offline / Pending) to station list header in Maps page |
+| Jul 11 | `6002d6c` | **Selected station card** — Moved from bottom to top of map for better visibility |
+| Jul 11 | `08e2860` | **StoreDetails improvements** — Fixed status to use `online`/`isOnline` instead of `openNow`; relabeled to "Online/Offline"; added Delivery Days card |
+| Jul 11 | `764aa83` | **Timezone fix in availableDates** — Replaced `toISOString()` with `toLocaleDateString('en-CA')` to prevent UTC date offset |
+| Jul 11 | `64dde5a` | **Timezone fix for today** — Changed `today` from `toISOString()` (UTC) to `toLocaleDateString('en-CA')` (local time) |
+| Jul 11 | `8184ee8` | **Auto-default nearest delivery date** — Automatically selects nearest available date when user hasn't manually picked one |
+| Jul 11 | `2b3aa17` | **Delivery date dropdown** — Replaced date button grid with `<select>` dropdown; lookahead reduced from 60 to 30 days |
 
 ---
 
