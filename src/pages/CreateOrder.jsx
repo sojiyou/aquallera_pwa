@@ -69,8 +69,8 @@ export default function CreateOrder() {
     { key: 'mineral', label: 'Mineral', unit: 'Gallon' },
   ]
   const deliveryFee = station?.pricing_delivery_fee || 50
-  const transactionFee = 5
   const subtotal = Object.entries(prices).reduce((sum, [type, price]) => sum + (price * (quantities[type] || 0)), 0)
+  const transactionFee = parseFloat(((subtotal + (orderType === 'Delivery' ? deliveryFee : 0)) * 0.02).toFixed(2))
   const grandTotal = subtotal + (orderType === 'Delivery' ? deliveryFee : 0) + transactionFee
   const hasItems = Object.values(quantities).some(q => q > 0)
   const emailUnverified = !user?.emailVerified
