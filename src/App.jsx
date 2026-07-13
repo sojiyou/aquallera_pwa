@@ -14,6 +14,9 @@ import Orders from './pages/Orders'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import { useAuth } from './hooks/useAuth'
+import { ToastProvider } from './hooks/useToast'
+import ToastContainer from './components/ToastContainer'
+import NotificationListener from './components/NotificationListener'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -25,22 +28,26 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Splash />} />
-      <Route path="/main" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-      <Route path="/maps" element={<ProtectedRoute><Maps /></ProtectedRoute>} />
-      <Route path="/store/:id" element={<ProtectedRoute><StoreDetails /></ProtectedRoute>} />
-      <Route path="/create-order/:id" element={<ProtectedRoute><CreateOrder /></ProtectedRoute>} />
-      <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-      <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
-      <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ToastProvider>
+      <Routes>
+        <Route path="/" element={<Splash />} />
+        <Route path="/main" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+        <Route path="/maps" element={<ProtectedRoute><Maps /></ProtectedRoute>} />
+        <Route path="/store/:id" element={<ProtectedRoute><StoreDetails /></ProtectedRoute>} />
+        <Route path="/create-order/:id" element={<ProtectedRoute><CreateOrder /></ProtectedRoute>} />
+        <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
+        <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <NotificationListener />
+      <ToastContainer />
+    </ToastProvider>
   )
 }
