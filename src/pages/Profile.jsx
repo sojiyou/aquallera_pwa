@@ -112,14 +112,24 @@ export default function Profile() {
           </p>
         </div>
 
-        <div className="card mb-4 border border-red-200">
-          <h3 className="font-bold text-red-700 mb-2">Delete Account</h3>
-          <p className="text-xs text-gray-600 mb-3">
-            Permanently delete your account and all associated data. This cannot be undone.
-          </p>
-          <button onClick={() => setShowDeleteModal(true)} className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium text-sm">
-            Delete My Account
-          </button>
+        <div className="space-y-2">
+          <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">Edit Profile</button>
+          <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">View Maps</button>
+          <button onClick={() => navigate('/orders')} className="btn-primary w-full text-left px-4">View Orders</button>
+          <button onClick={() => navigate('/about')} className="btn-primary w-full text-left px-4">About Aquallera</button>
+          <button onClick={() => window.location.href = 'mailto:aquallera.main@gmail.com?subject=Bug Report - Aquallera&body=Please describe the issue you encountered in detail:%0A%0A'} className="btn-primary w-full flex items-center px-4"><span>Report Bug</span><span className="text-[10px] ml-auto">aquallera.main@gmail.com</span></button>
+
+          <div className="card border border-red-200">
+            <h3 className="font-bold text-red-700 mb-2">Delete Account</h3>
+            <p className="text-xs text-gray-600 mb-3">
+              Permanently delete your account and all associated data. This cannot be undone.
+            </p>
+            <button onClick={() => setShowDeleteModal(true)} className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium text-sm">
+              Delete My Account
+            </button>
+          </div>
+
+          <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg font-medium text-left px-4">Log Out</button>
         </div>
 
         {showDeleteModal && (
@@ -184,15 +194,6 @@ export default function Profile() {
             </div>
           </div>
         )}
-
-        <div className="space-y-2">
-          <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">Edit Profile</button>
-          <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">View Maps</button>
-          <button onClick={() => navigate('/orders')} className="btn-primary w-full text-left px-4">View Orders</button>
-          <button onClick={() => navigate('/about')} className="btn-primary w-full text-left px-4">About Aquallera</button>
-          <button onClick={() => window.location.href = 'mailto:aquallera.main@gmail.com?subject=Bug Report - Aquallera&body=Please describe the issue you encountered in detail:%0A%0A'} className="btn-primary w-full flex items-center px-4"><span>Report Bug</span><span className="text-[10px] ml-auto">aquallera.main@gmail.com</span></button>
-          <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg font-medium text-left px-4">Log Out</button>
-        </div>
       </div>
       <BottomNav />
     </div>
