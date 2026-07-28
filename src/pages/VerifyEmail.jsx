@@ -50,8 +50,11 @@ export default function VerifyEmail() {
         A verification link has been sent to:
       </p>
       <p className="text-midnight-blue font-semibold text-sm mb-6">{user.email}</p>
-      <p className="text-gray-500 text-xs text-center mb-2">
+      <p className="text-gray-500 text-xs text-center mb-1">
         Click the link in the email to activate your account.
+      </p>
+      <p className="text-gray-400 text-xs text-center mb-1">
+        Didn&apos;t receive it? Check your spam or junk folder.
       </p>
       <p className="text-gray-400 text-xs text-center mb-6 flex items-center justify-center gap-1">
         <span className="w-3 h-3 border-2 border-midnight-blue border-t-transparent rounded-full animate-spin inline-block" />
