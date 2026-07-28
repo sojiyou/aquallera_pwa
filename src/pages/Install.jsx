@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Install() {
+  const navigate = useNavigate()
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstalled, setIsInstalled] = useState(false)
 
@@ -10,12 +12,14 @@ export default function Install() {
       setDeferredPrompt(e)
     }
     window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => setIsInstalled(true))
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true)
+      setTimeout(() => navigate('/main', { replace: true }), 1200)
+    })
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
-      window.removeEventListener('appinstalled', () => setIsInstalled(true))
     }
-  }, [])
+  }, [navigate])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
@@ -24,6 +28,13 @@ export default function Install() {
     if (outcome === 'accepted') setIsInstalled(true)
     setDeferredPrompt(null)
   }
+
+  useEffect(() => {
+    if (isInstalled) {
+      const t = setTimeout(() => navigate('/main', { replace: true }), 1200)
+      return () => clearTimeout(t)
+    }
+  }, [isInstalled, navigate])
 
   return (
     <div className="h-dvh flex flex-col bg-app-bg">
@@ -34,7 +45,7 @@ export default function Install() {
           Find water refilling stations near you, place orders, and enjoy clean drinking water delivered to your doorstep.
         </p>
         {isInstalled ? (
-          <p className="text-green-600 font-medium text-sm">App installed successfully!</p>
+          <p className="text-green-600 font-medium text-sm">App installed! Redirecting...</p>
         ) : (
           <button
             className={`btn-primary w-[200px] flex items-center justify-center gap-2 ${!deferredPrompt ? 'opacity-50 cursor-not-allowed' : ''}`}
