@@ -102,16 +102,6 @@ export default function Profile() {
           )}
         </div>
 
-        <div className="card mb-4">
-          <h3 className="font-bold text-midnight-blue mb-2">Data Privacy</h3>
-          <p className="text-xs text-gray-600 leading-relaxed">
-            We collect your name, email, phone number, delivery address, and order history
-            to process your orders and send updates. Your data is stored securely and is never
-            shared with third parties. Deleting your account removes all personal data and
-            cancels any pending orders.
-          </p>
-        </div>
-
         <div className="space-y-2">
           <button onClick={() => navigate('/edit-profile')} className="btn-primary w-full text-left px-4">Edit Profile</button>
           <button onClick={() => navigate('/maps')} className="btn-primary w-full text-left px-4">View Maps</button>
