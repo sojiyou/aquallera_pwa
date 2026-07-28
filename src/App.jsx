@@ -3,6 +3,7 @@ import Splash from './pages/Splash'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Install from './pages/Install'
 import VerifyEmail from './pages/VerifyEmail'
 import About from './pages/About'
 import Maps from './pages/Maps'
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/install" element={<Install />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <NotificationListener />
