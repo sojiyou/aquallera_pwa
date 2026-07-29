@@ -1,10 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { db, ref, get } from './services/firebase'
+import { useAuth } from './hooks/useAuth'
 import Splash from './pages/Splash'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Install from './pages/Install'
-import VerifyEmail from './pages/VerifyEmail'
+import VerifyCode from './pages/VerifyCode'
 import About from './pages/About'
 import Maps from './pages/Maps'
 import StoreDetails from './pages/StoreDetails'
@@ -14,16 +17,24 @@ import OrderSuccess from './pages/OrderSuccess'
 import Orders from './pages/Orders'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
-import { useAuth } from './hooks/useAuth'
 import { ToastProvider } from './hooks/useToast'
 import ToastContainer from './components/ToastContainer'
 import NotificationListener from './components/NotificationListener'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  const [verified, setVerified] = useState(null)
+
+  useEffect(() => {
+    if (!user) return
+    get(ref(db, `emailVerification/${user.uid}/verified`)).then(snap => {
+      setVerified(snap.val() === true)
+    })
+  }, [user])
+
+  if (loading || verified === null) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
   if (!user) return <Navigate to="/main" replace />
-  if (!user.emailVerified) return <Navigate to="/verify-email" replace />
+  if (!verified) return <Navigate to="/verify-code" replace />
   return children
 }
 
@@ -35,7 +46,7 @@ export default function App() {
         <Route path="/main" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-code" element={<VerifyCode />} />
         <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
         <Route path="/maps" element={<ProtectedRoute><Maps /></ProtectedRoute>} />
         <Route path="/store/:id" element={<ProtectedRoute><StoreDetails /></ProtectedRoute>} />

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { auth, db, ref, get, set, query, orderByChild, equalTo, sendEmailVerification } from '../services/firebase'
+import { auth, db, ref, get, set, query, orderByChild, equalTo } from '../services/firebase'
+import { sendVerificationCode } from '../services/emailjs'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { getFirebaseErrorMessage } from '../utils/errors'
 import Footer from '../components/Footer'
@@ -46,8 +47,16 @@ export default function Signup() {
       const cred = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(cred.user, { displayName: fullName })
       await set(ref(db, `users/${cred.user.uid}`), { uid: cred.user.uid, fullName, email, number, createdAt: Date.now() })
-      await sendEmailVerification(cred.user)
-      navigate('/verify-email', { replace: true })
+
+      const code = String(Math.floor(100000 + Math.random() * 900000))
+      await set(ref(db, `emailVerification/${cred.user.uid}`), {
+        code,
+        email,
+        createdAt: Date.now(),
+        verified: false,
+      })
+      await sendVerificationCode(email, code)
+      navigate('/verify-code', { replace: true })
     } catch (err) {
       setError(getFirebaseErrorMessage(err))
     } finally {

@@ -1,15 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../hooks/useAuth'
-import { auth, db, ref, get, child, sendEmailVerification } from '../services/firebase'
+import { auth, db, ref, get, child, set } from '../services/firebase'
 import { signOut } from 'firebase/auth'
 import { useEffect, useState } from 'react'
+import { sendVerificationCode } from '../services/emailjs'
 
 export default function Profile() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [userData, setUserData] = useState(null)
-  const [emailVerified, setEmailVerified] = useState(user?.emailVerified ?? false)
+  const [emailVerified, setEmailVerified] = useState(false)
   const [verifSending, setVerifSending] = useState(false)
 
   useEffect(() => {
@@ -18,20 +19,26 @@ export default function Profile() {
     get(child(dbRef, `users/${user.uid}`)).then((snapshot) => {
       if (snapshot.exists()) setUserData(snapshot.val())
     })
+    get(child(dbRef, `emailVerification/${user.uid}/verified`)).then((snap) => {
+      setEmailVerified(snap.val() === true)
+    })
   }, [user])
-
-  useEffect(() => {
-    setEmailVerified(user?.emailVerified ?? false)
-  }, [user?.emailVerified])
 
   const handleResendVerification = async () => {
     if (!auth.currentUser) return
     setVerifSending(true)
     try {
-      await sendEmailVerification(auth.currentUser)
-      alert('Verification email sent! Check your inbox.')
+      const code = String(Math.floor(100000 + Math.random() * 900000))
+      await set(ref(db, `emailVerification/${auth.currentUser.uid}`), {
+        code,
+        email: auth.currentUser.email,
+        createdAt: Date.now(),
+        verified: false,
+      })
+      await sendVerificationCode(auth.currentUser.email, code)
+      alert('Verification code sent! Check your inbox.')
     } catch {
-      alert('Failed to send verification email. Try again later.')
+      alert('Failed to send verification code.')
     } finally {
       setVerifSending(false)
     }
@@ -40,8 +47,8 @@ export default function Profile() {
   const handleRefreshStatus = async () => {
     if (!auth.currentUser) return
     try {
-      await auth.currentUser.reload()
-      setEmailVerified(auth.currentUser.emailVerified)
+      const snap = await get(ref(db, `emailVerification/${auth.currentUser.uid}/verified`))
+      setEmailVerified(snap.val() === true)
     } catch {
       alert('Failed to refresh status.')
     }

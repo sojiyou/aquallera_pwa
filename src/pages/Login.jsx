@@ -45,7 +45,8 @@ export default function Login() {
         }
       }
 
-      navigate('/maps', { replace: true })
+      const verifSnap = await get(ref(db, `emailVerification/${user.uid}/verified`))
+      navigate(verifSnap.val() === true ? '/maps' : '/verify-code', { replace: true })
     } catch (err) {
       setError(getFirebaseErrorMessage(err))
     } finally {
