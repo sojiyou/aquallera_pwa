@@ -79,11 +79,6 @@ export default function Signup() {
                 <FloatingInput label="Number" type="tel" name="number" value={form.number} onChange={handleChange} required />
                 <FloatingInput label="Password" type="password" name="password" value={form.password} onChange={handleChange} required />
                 <FloatingInput label="Confirm Password" type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} className="mb-4" required />
-                <p className="text-xs text-gray-400 text-center mb-3">
-                  By creating an account, you agree to our data practices. We collect your name, email, and phone number
-                  to process your orders and send updates. Deleting your account removes all personal data
-                  and cancels pending orders.
-                </p>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-gray-600 text-sm">Already have an account?</p>

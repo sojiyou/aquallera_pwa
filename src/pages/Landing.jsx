@@ -1,8 +1,22 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
+import DataPrivacyDialog from '../components/DataPrivacyDialog'
 
 export default function Landing() {
   const navigate = useNavigate()
+  const [privacyAccepted, setPrivacyAccepted] = useState(
+    localStorage.getItem('privacy-accepted') === 'true'
+  )
+
+  const handlePrivacyContinue = () => {
+    localStorage.setItem('privacy-accepted', 'true')
+    setPrivacyAccepted(true)
+  }
+
+  if (!privacyAccepted) {
+    return <DataPrivacyDialog onContinue={handlePrivacyContinue} />
+  }
 
   return (
     <div className="h-dvh flex flex-col bg-app-bg">
