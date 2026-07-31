@@ -63,24 +63,24 @@ export default function Login() {
       </svg>
       <div className="flex-1 overflow-y-auto relative z-10">
         <div className="flex flex-col items-center pt-4">
-          <img src="/logo-no-name.png" alt="Aquallera Logo" className="w-[200px] h-[200px] object-contain mb-2" />
+          <img src="/logo-no-name.png" alt="Aquallera Logo" className="w-[180px] h-[180px] object-contain mb-2" />
           <div className="w-full max-w-md mx-auto px-10">
             <button onClick={() => navigate(-1)} className="text-light-yellow mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
             </button>
             <h1 className="text-light-yellow text-2xl font-bold mb-1">Log In</h1>
             <p className="text-gray-300 text-base mb-6">Welcome! Log in to continue.</p>
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-4">
+            <div className="bg-white rounded-xl shadow-lg px-8 py-9 mb-4">
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
                 <FloatingInput label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 <FloatingInput label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" required />
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between gap-3 mb-4">
                   <div>
                     <p className="text-gray-600 text-sm">Don&apos;t have an account?</p>
                     <Link to="/signup" className="text-midnight-blue text-sm font-medium">Sign Up</Link>
                   </div>
-                  <button type="submit" disabled={loading} className="btn-primary w-[120px]">
+                  <button type="submit" disabled={loading} className="btn-primary whitespace-nowrap px-5 py-2 w-[140px]">
                     {loading ? 'Processing...' : 'Log In'}
                   </button>
                 </div>

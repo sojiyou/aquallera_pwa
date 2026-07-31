@@ -134,10 +134,10 @@ export default function VerifyCode() {
         </button>
 
         <button
-          onClick={() => { signOut(auth); navigate('/login') }}
+          onClick={() => { signOut(auth); navigate('/signup') }}
           className="text-gray-400 text-xs underline"
         >
-          Back to Login
+          Back to Signup
         </button>
       </div>
 
