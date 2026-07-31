@@ -146,18 +146,16 @@ export default function StoreDetails() {
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">Price List</h2>
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-order-list rounded-lg p-2 text-center">
-              <p className="text-xs text-gray-600">Pure (Gallon)</p>
-              <p className="text-midnight-blue font-bold">₱{(station.pricing_gallon_pure || 0).toFixed(2)}</p>
-            </div>
-            <div className="bg-order-list rounded-lg p-2 text-center">
-              <p className="text-xs text-gray-600">Spring (Gallon)</p>
-              <p className="text-midnight-blue font-bold">₱{(station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0).toFixed(2)}</p>
-            </div>
-            <div className="bg-order-list rounded-lg p-2 text-center">
-              <p className="text-xs text-gray-600">Mineral (Gallon)</p>
-              <p className="text-midnight-blue font-bold">₱{(station.pricing_gallon_mineral || 0).toFixed(2)}</p>
-            </div>
+            {[
+              { key: 'pure', label: 'Pure (Gallon)', price: station.pricing_gallon_pure || 0 },
+              { key: 'spring', label: 'Spring (Gallon)', price: station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0 },
+              { key: 'mineral', label: 'Mineral (Gallon)', price: station.pricing_gallon_mineral || 0 },
+            ].filter(t => (station.waterTypes?.length ? station.waterTypes : ['pure', 'spring', 'mineral']).includes(t.key)).map(t => (
+              <div key={t.key} className="bg-order-list rounded-lg p-2 text-center">
+                <p className="text-xs text-gray-600">{t.label}</p>
+                <p className="text-midnight-blue font-bold">₱{Number(t.price).toFixed(2)}</p>
+              </div>
+            ))}
           </div>
         </div>
 

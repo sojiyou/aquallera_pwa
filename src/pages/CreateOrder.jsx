@@ -67,7 +67,7 @@ export default function CreateOrder() {
     { key: 'pure', label: 'Pure', unit: 'Gallon' },
     { key: 'spring', label: 'Spring', unit: 'Gallon' },
     { key: 'mineral', label: 'Mineral', unit: 'Gallon' },
-  ]
+  ].filter(t => (station?.waterTypes?.length ? station.waterTypes : ['pure', 'spring', 'mineral']).includes(t.key))
   const deliveryFee = station?.pricing_delivery_fee || 50
   const subtotal = Object.entries(prices).reduce((sum, [type, price]) => sum + (price * (quantities[type] || 0)), 0)
   const transactionFee = parseFloat(((subtotal + (orderType === 'Delivery' ? deliveryFee : 0)) * 0.02).toFixed(2))

@@ -29,9 +29,13 @@ export default function WaterStationCard({ station, userLocation, onViewOnMap })
         <span className="text-xs text-gray-500">{dist ? `${dist} away` : 'Distance unavailable'}</span>
       </div>
       <div className="bg-order-list rounded-lg px-3 py-2 flex flex-wrap gap-x-3 gap-y-1 text-xs mb-3">
-        <span className="text-gray-600">Pure: <strong className="text-midnight-blue">₱{(station.pricing_gallon_pure || 0).toFixed(2)}</strong></span>
-        <span className="text-gray-600">Spring: <strong className="text-midnight-blue">₱{(station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0).toFixed(2)}</strong></span>
-        <span className="text-gray-600">Mineral: <strong className="text-midnight-blue">₱{(station.pricing_gallon_mineral || 0).toFixed(2)}</strong></span>
+        {[
+          { key: 'pure', label: 'Pure', price: station.pricing_gallon_pure || 0 },
+          { key: 'spring', label: 'Spring', price: station.pricing_liter_spring ?? station.pricing_gallon_spring ?? 0 },
+          { key: 'mineral', label: 'Mineral', price: station.pricing_gallon_mineral || 0 },
+        ].filter(t => (station.waterTypes?.length ? station.waterTypes : ['pure', 'spring', 'mineral']).includes(t.key)).map(t => (
+          <span key={t.key} className="text-gray-600">{t.label}: <strong className="text-midnight-blue">₱{Number(t.price).toFixed(2)}</strong></span>
+        ))}
       </div>
       <div className="flex justify-end gap-3">
         <button onClick={() => onViewOnMap?.(station)} className="btn-primary text-xs px-4 py-1.5">View on Map</button>
