@@ -78,6 +78,22 @@ export default function StoreDetails() {
       </div>
 
       <div className="flex-1 p-4 space-y-4">
+        {station.businessPermitDocuments && Object.keys(station.businessPermitDocuments).length > 0 && (
+          <div className="card">
+            <h2 className="font-bold text-midnight-blue mb-2">Verified Documents</h2>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(station.businessPermitDocuments)
+                .filter(([, d]) => d?.filename || d?.base64)
+                .map(([key, d]) => (
+                  <span key={key} className="bg-green-50 text-green-700 text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1">
+                    <img src="/badge.svg" alt="" className="w-4 h-4" />
+                    {DOC_NAMES[key] || key}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
         <div className="card">
           {station.businessHours && (() => {
             const bh = station.businessHours
@@ -126,22 +142,6 @@ export default function StoreDetails() {
             <p className="text-gray-500 text-xs">No services listed</p>
           )}
         </div>
-
-        {station.businessPermitDocuments && Object.keys(station.businessPermitDocuments).length > 0 && (
-          <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">Verified Documents</h2>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(station.businessPermitDocuments)
-                .filter(([, d]) => d?.filename || d?.base64)
-                .map(([key, d]) => (
-                  <span key={key} className="bg-green-50 text-green-700 text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1">
-                    <img src="/badge.svg" alt="" className="w-4 h-4" />
-                    {DOC_NAMES[key] || key}
-                  </span>
-                ))}
-            </div>
-          </div>
-        )}
 
         {station.serviceTypes?.includes('delivery') && station.deliveryDays?.length > 0 && (
           <div className="card">
