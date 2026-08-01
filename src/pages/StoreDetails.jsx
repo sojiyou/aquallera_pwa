@@ -143,26 +143,29 @@ export default function StoreDetails() {
           )}
         </div>
 
-        {station.serviceTypes?.includes('delivery') && station.deliveryDays?.length > 0 && (
+        {station.serviceTypes?.includes('delivery') && (station.deliveryDays?.length > 0 || station.deliveryHours?.length > 0) && (
           <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">Delivery Days</h2>
-            <div className="flex flex-wrap gap-2">
-              {station.deliveryDays.map((day) => (
-                <span key={day} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full capitalize">{day}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {station.serviceTypes?.includes('delivery') && station.deliveryHours?.length > 0 && (
-          <div className="card">
-            <h2 className="font-bold text-midnight-blue mb-2">Delivery Hours</h2>
-            <p className="text-xs text-gray-500 mb-2">Available delivery time slots</p>
-            <div className="flex flex-wrap gap-2">
-              {station.deliveryHours.map((time, i) => (
-                <span key={i} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{to12Hour(time)}</span>
-              ))}
-            </div>
+            <h2 className="font-bold text-midnight-blue mb-2">Delivery Schedule</h2>
+            {station.deliveryDays?.length > 0 && (
+              <>
+                <p className="text-xs text-gray-500 mb-1">Days</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {station.deliveryDays.map((day) => (
+                    <span key={day} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full capitalize">{day}</span>
+                  ))}
+                </div>
+              </>
+            )}
+            {station.deliveryHours?.length > 0 && (
+              <>
+                <p className="text-xs text-gray-500 mb-1">Hours</p>
+                <div className="flex flex-wrap gap-2">
+                  {station.deliveryHours.map((time, i) => (
+                    <span key={i} className="bg-order-list text-midnight-blue text-xs px-3 py-1 rounded-full">{to12Hour(time)}</span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
