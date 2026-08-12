@@ -23,6 +23,14 @@ export default function OrderReceipt({ order, revoked }) {
         <span className="inline-block mt-1 text-xs bg-blue-50 text-midnight-blue px-3 py-0.5 rounded-full font-medium">{order.orderType || order.order_type || 'N/A'}</span>
       </div>
 
+      {(order.orderType || order.order_type || '').toLowerCase() === 'delivery' && (
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-gray-600 mb-4">
+          <strong>Note:</strong> Please have your empty water gallons ready for pickup when the
+          delivery truck arrives. Delivered gallons are swapped one-for-one with your empty ones —
+          any gallon not returned will be charged.
+        </div>
+      )}
+
       <div className="space-y-3 mb-4 pb-4 border-b border-dashed border-gray-300">
         <div className="flex justify-between text-xs text-gray-500 font-medium uppercase tracking-wide">
           <span className="flex-[2]">Item</span>

@@ -367,6 +367,13 @@ export default function CreateOrder() {
               >{type}</button>
             ))}
           </div>
+          {orderType === 'Delivery' && (
+            <div className="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-gray-600">
+              <strong>Note:</strong> Please have your empty water gallons ready for pickup when the
+              delivery truck arrives. Delivered gallons are swapped one-for-one with your empty ones —
+              any gallon not returned will be charged.
+            </div>
+          )}
         </div>
 
         {orderType === 'Delivery' && (
