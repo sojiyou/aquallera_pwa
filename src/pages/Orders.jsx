@@ -27,6 +27,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [stationStatuses, setStationStatuses] = useState({})
   const [cancellingId, setCancellingId] = useState(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
   const [filterStatus, setFilterStatus] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -97,8 +98,10 @@ export default function Orders() {
         status: 'cancelled',
         updatedAt: new Date().toISOString()
       })
+      setSelectedOrder({ ...order, status: 'cancelled', updatedAt: new Date().toISOString() })
     } catch {}
     setCancellingId(null)
+    setShowCancelModal(false)
   }
 
   const filteredOrders = filterStatus === 'all'
@@ -120,12 +123,31 @@ export default function Orders() {
           <OrderReceipt order={selectedOrder} revoked={isRevoked(selectedOrder.stationId)} />
           {canCancel && (
             <button
-              onClick={() => handleCancelOrder(selectedOrder)}
+              onClick={() => setShowCancelModal(true)}
               disabled={cancellingId === selectedOrder.firebaseKey}
               className="w-full py-3 rounded-lg bg-red-500 text-white font-medium text-sm disabled:opacity-50"
             >{cancellingId === selectedOrder.firebaseKey ? 'Cancelling...' : 'Cancel Order'}</button>
           )}
         </div>
+
+        {showCancelModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
+            <div className="bg-white rounded-2xl p-5 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-red-700 font-bold text-lg mb-3">Cancel Order</h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Are you sure you want to cancel this order? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowCancelModal(false)} disabled={!!cancellingId} className="btn-secondary flex-1">Keep Order</button>
+                <button
+                  onClick={() => handleCancelOrder(selectedOrder)}
+                  disabled={!!cancellingId}
+                  className="flex-1 py-2.5 rounded-lg font-medium text-sm bg-red-500 text-white disabled:opacity-50"
+                >{cancellingId === selectedOrder.firebaseKey ? 'Cancelling...' : 'Cancel Order'}</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
