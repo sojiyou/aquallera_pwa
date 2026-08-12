@@ -12,6 +12,7 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showActiveOrdersModal, setShowActiveOrdersModal] = useState(false)
   const [deletingAccount, setDeletingAccount] = useState(false)
 
   useEffect(() => {
@@ -79,7 +80,27 @@ export default function EditProfile() {
           <p className="text-xs text-gray-600 mb-3">
             Permanently delete your account and all associated data. This cannot be undone.
           </p>
-          <button onClick={() => setShowDeleteModal(true)} className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium text-sm">
+          <button
+            onClick={async () => {
+              try {
+                const ordersSnap = await get(ref(db, 'orders'))
+                let hasActive = false
+                if (ordersSnap.exists()) {
+                  ordersSnap.forEach((child) => {
+                    const o = child.val()
+                    if ((o.userId === user.uid || o.customerId === user.uid) && !['completed', 'cancelled'].includes((o.status || '').toLowerCase())) {
+                      hasActive = true
+                    }
+                  })
+                }
+                if (hasActive) setShowActiveOrdersModal(true)
+                else setShowDeleteModal(true)
+              } catch {
+                alert('Unable to check your orders. Please try again.')
+              }
+            }}
+            className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium text-sm"
+          >
             Delete My Account
           </button>
         </div>
@@ -93,7 +114,6 @@ export default function EditProfile() {
               </p>
               <ul className="text-sm text-gray-600 space-y-2 mb-6 list-disc pl-5">
                 <li>All your personal data will be permanently removed.</li>
-                <li>Any pending or confirmed orders will be automatically cancelled.</li>
                 <li>You will no longer be able to access this account.</li>
               </ul>
               <div className="flex gap-3">
@@ -103,27 +123,6 @@ export default function EditProfile() {
                     if (deletingAccount || !user) return
                     setDeletingAccount(true)
                     try {
-                      const ordersRef = ref(db, 'orders')
-                      const ordersSnap = await get(ordersRef)
-                      if (ordersSnap.exists()) {
-                        const cancelPromises = []
-                        ordersSnap.forEach((child) => {
-                          const o = child.val()
-                          if (o.userId === user.uid || o.customerId === user.uid) {
-                            const s = (o.status || '').toLowerCase()
-                            if (s === 'pending' || s === 'confirmed') {
-                              cancelPromises.push(
-                                update(ref(db, `orders/${child.key}`), {
-                                  status: 'cancelled',
-                                  cancellationReason: 'Account deleted',
-                                  updatedAt: new Date().toISOString()
-                                })
-                              )
-                            }
-                          }
-                        })
-                        await Promise.all(cancelPromises)
-                      }
                       await remove(ref(db, `users/${user.uid}`))
                       await deleteUser(auth.currentUser)
                       await signOut(auth)
@@ -141,6 +140,24 @@ export default function EditProfile() {
                   className="flex-1 py-2.5 rounded-lg font-medium text-sm bg-red-500 text-white disabled:opacity-50"
                 >
                   {deletingAccount ? 'Deleting...' : 'Delete My Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showActiveOrdersModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowActiveOrdersModal(false)}>
+            <div className="bg-white rounded-2xl p-5 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-red-700 font-bold text-lg mb-3">Active Orders Found</h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Your account still has orders that are not yet completed or cancelled. Please complete
+                or cancel all your orders before deleting your account.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowActiveOrdersModal(false)} className="btn-secondary flex-1">Close</button>
+                <button onClick={() => { setShowActiveOrdersModal(false); navigate('/orders') }} className="btn-primary flex-1">
+                  Go to My Orders
                 </button>
               </div>
             </div>

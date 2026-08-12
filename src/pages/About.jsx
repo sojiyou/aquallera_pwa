@@ -74,8 +74,8 @@ export default function About() {
           <p className="text-sm text-gray-600 leading-relaxed">
             When you delete your account through the app, all your personal data including your
             name, email address, phone number, and delivery addresses are permanently removed from
-            our database. Any pending or confirmed orders are automatically cancelled and will no
-            longer be processed. Your Firebase Authentication account is also deleted. This action
+            our database. To delete your account, all your orders must first be completed or
+            cancelled. Your Firebase Authentication account is also deleted. This action
             is irreversible and cannot be undone. You will need to create a new account if you wish
             to use Aquallera again.
           </p>
