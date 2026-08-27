@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { auth, db, ref, get, update, child, remove, deleteUser } from '../services/firebase'
-import { signOut } from 'firebase/auth'
+import { signOut, updateProfile } from 'firebase/auth'
 
 export default function EditProfile() {
   const { user } = useAuth()
@@ -41,6 +41,9 @@ export default function EditProfile() {
         email: form.email.trim(),
         number: form.number.trim(),
       })
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: form.name.trim() })
+      }
       alert('Profile updated successfully!')
       navigate('/profile')
     } catch (e) {

@@ -79,7 +79,7 @@ export default function CreateOrder() {
     userEmail: user.email,
     stationId: id,
     stationName: station.stationName,
-    customerName: userData?.fullName || user?.displayName || '',
+    customerName: userData?.name || userData?.fullName || user?.displayName || '',
     customerPhone: userData?.number || '',
     orderType,
     status: 'pending',
@@ -321,7 +321,7 @@ export default function CreateOrder() {
       </div>
       <div className="p-4 flex gap-3">
         <button onClick={() => setShowPreview(false)} className="btn-secondary flex-1">Edit Order</button>
-        <button onClick={() => navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.fullName || user.displayName } })} className="btn-primary flex-1">Proceed</button>
+        <button onClick={() => navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.name || userData?.fullName || user.displayName } })} className="btn-primary flex-1">Proceed</button>
       </div>
     </div>
   )
