@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
-import { auth, db, ref, get, update, child, remove, deleteUser, query, orderByChild, equalTo } from '../services/firebase'
+import { auth, db, ref, get, set, update, child, remove, deleteUser, query, orderByChild, equalTo } from '../services/firebase'
 import { signOut, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth'
 import { sendVerificationCode } from '../services/emailjs'
 
@@ -170,6 +170,7 @@ export default function EditProfile() {
       await reauthenticateWithCredential(auth.currentUser, credential)
       await updateEmail(auth.currentUser, newEmail)
       await set(ref(db, `emailChange/${user.uid}/verified`), true)
+      await set(ref(db, `emailVerification/${user.uid}/verified`), true)
       await update(ref(db, `users/${user.uid}`), {
         name: form.name.trim(),
         email: newEmail,
