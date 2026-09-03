@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { useAuth } from '../hooks/useAuth'
-import { auth, db, ref, get, child, set } from '../services/firebase'
+import { auth, db, ref, get, child, set, onValue } from '../services/firebase'
 import { signOut } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import { sendVerificationCode } from '../services/emailjs'
@@ -15,13 +15,13 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) return
-    const dbRef = ref(db)
-    get(child(dbRef, `users/${user.uid}`)).then((snapshot) => {
+    const unsubUser = onValue(ref(db, `users/${user.uid}`), (snapshot) => {
       if (snapshot.exists()) setUserData(snapshot.val())
     })
-    get(child(dbRef, `emailVerification/${user.uid}/verified`)).then((snap) => {
+    const unsubVerif = onValue(ref(db, `emailVerification/${user.uid}/verified`), (snap) => {
       setEmailVerified(snap.val() === true)
     })
+    return () => { unsubUser(); unsubVerif() }
   }, [user])
 
   const handleResendVerification = async () => {
