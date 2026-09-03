@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged, sendEmailVerification, deleteUser } from 'firebase/auth'
+import { getAuth, onAuthStateChanged, sendEmailVerification, deleteUser, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth'
 import { getDatabase, ref, child, get, set, push, update, remove, query, orderByChild, equalTo, onValue, off, runTransaction, serverTimestamp } from 'firebase/database'
 
 const firebaseConfig = {
@@ -58,5 +58,8 @@ export {
   onAuthStateChanged,
   sendEmailVerification,
   deleteUser,
+  updateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   generateReferenceNumber,
 }
