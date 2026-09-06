@@ -7,12 +7,12 @@ export default {
         sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        xs: '16px',
-        sm: '18px',
-        base: '21px',
-        lg: '23px',
-        xl: '25px',
-        '2xl': '30px',
+        xs: '20px',
+        sm: '23px',
+        base: '26px',
+        lg: '29px',
+        xl: '31px',
+        '2xl': '38px',
       },
       colors: {
         midnight: {
