@@ -148,7 +148,7 @@ export default function Maps() {
 
   const LABEL_MIN_ZOOM = 13
   const getMarkerSize = (zoom) => Math.max(16, Math.min(48, 20 + (zoom - 10) * 4))
-  const getLabelFontSize = (zoom) => zoom < LABEL_MIN_ZOOM ? 0 : Math.max(10, Math.min(16, 8 + (zoom - LABEL_MIN_ZOOM) * 1.5))
+  const getLabelFontSize = (zoom) => zoom < LABEL_MIN_ZOOM ? 0 : Math.max(12, Math.min(18, 9 + (zoom - LABEL_MIN_ZOOM) * 1.7))
 
   useEffect(() => {
     if (!map.current) return
@@ -178,7 +178,7 @@ export default function Maps() {
         pointer-events:none;
         transition:font-size 0.15s, opacity 0.15s;
         opacity:${labelFontSize > 0 ? 1 : 0};
-        max-width:120px;
+        max-width:140px;
         overflow:hidden;
         text-overflow:ellipsis;
         text-align:center;
@@ -332,7 +332,7 @@ export default function Maps() {
           <h1 className="text-midnight-blue font-bold text-lg leading-tight">Aquallera</h1>
           <p className="text-gray-500 italic text-xs">&ldquo;Clean Water, Anytime, Anywhere.&rdquo;</p>
         </div>
-        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[12px] px-2.5 py-1.5 leading-none">How to Order</button>
+        <button onClick={() => setShowHowToOrder(true)} className="btn-primary text-[14px] px-2.5 py-1.5 leading-none">How to Order</button>
       </div>
 
       <div ref={containerRef} className="flex-1 relative overflow-hidden">

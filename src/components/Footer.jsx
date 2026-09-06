@@ -17,12 +17,12 @@ export default function Footer() {
       <hr className="border-white/30 mb-2" />
       <p className="text-white text-xs mb-1">Contact Us:</p>
       <div className="flex items-center justify-between">
-        <span className="text-white text-[12px]">aquallera.main@gmail.com</span>
-        <span className="text-white text-[12px]">2600, Baguio City Philippines</span>
+        <span className="text-white text-[14px]">aquallera.main@gmail.com</span>
+        <span className="text-white text-[14px]">2600, Baguio City Philippines</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-white text-[12px]">0927-7263-218</span>
-        <span className="text-white text-[12px]">&copy; 2025 Aqua-llera. All rights reserved.</span>
+        <span className="text-white text-[14px]">0927-7263-218</span>
+        <span className="text-white text-[14px]">&copy; 2025 Aqua-llera. All rights reserved.</span>
       </div>
     </footer>
   )

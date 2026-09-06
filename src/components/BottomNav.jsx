@@ -51,7 +51,7 @@ export default function BottomNav() {
                 ${isActive ? 'opacity-100' : 'opacity-60'}`}
             >
               <Icon active={isActive} />
-              <span className={`text-[12px] mt-0.5 ${isActive ? 'text-white' : 'text-light-yellow'}`}>
+              <span className={`text-[14px] mt-0.5 ${isActive ? 'text-white' : 'text-light-yellow'}`}>
                 {tab.label}
               </span>
             </button>
