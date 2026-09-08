@@ -78,7 +78,7 @@ export default function Profile() {
           <h3 className="font-bold text-midnight-blue mb-2">Account Details</h3>
           <div className="text-sm space-y-2">
             <div className="flex justify-between"><span className="text-gray-600">Name</span><span className="font-medium">{userData?.name || userData?.fullName || 'N/A'}</span></div>
-            <div className="flex justify-between"><span className="text-gray-600">Email</span><span className="font-medium">{user?.email}</span></div>
+            <div className="flex justify-between gap-2"><span className="text-gray-600 shrink-0">Email</span><span className="font-medium min-w-0 truncate">{user?.email}</span></div>
             <div className="flex justify-between"><span className="text-gray-600">Phone</span><span className="font-medium">{userData?.number || userData?.phone || 'N/A'}</span></div>
           </div>
         </div>
