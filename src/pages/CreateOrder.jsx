@@ -295,6 +295,12 @@ export default function CreateOrder() {
 
   if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
+  if (station.status && station.status !== 'approved') return (
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4 px-6 text-center">
+      <p className="text-midnight-blue font-bold">This station is not accepting orders right now.</p>
+      <button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button>
+    </div>
+  )
 
   if (showPreview) return (
     <div className="h-dvh bg-app-bg flex flex-col">
