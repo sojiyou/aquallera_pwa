@@ -24,6 +24,7 @@ export default function CreateOrder() {
   const [preferredDate, setPreferredDate] = useState(today)
   const [preferredTime, setPreferredTime] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [orderError, setOrderError] = useState('')
   const [addressSearch, setAddressSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
@@ -74,6 +75,13 @@ export default function CreateOrder() {
   const transactionFee = parseFloat(((subtotal + (orderType === 'Delivery' ? deliveryFee : 0)) * 0.02).toFixed(2))
   const grandTotal = subtotal + (orderType === 'Delivery' ? deliveryFee : 0) + transactionFee
   const hasItems = Object.values(quantities).some(q => q > 0)
+  const validateOrder = () => {
+    if (!hasItems) return 'Please select at least one water type.'
+    if (orderType === 'Delivery' && !userAddress.trim()) return 'Please enter your delivery address.'
+    if (orderType === 'Delivery' && station?.deliveryHours?.length > 0 && !preferredTime) return 'Please select a delivery time.'
+    if (orderType === 'Pickup' && !preferredTime) return 'Please select a pickup time.'
+    return ''
+  }
   const buildOrderData = () => ({
     customerId: user.uid,
     userId: user.uid,
@@ -322,7 +330,16 @@ export default function CreateOrder() {
       </div>
       <div className="p-4 flex gap-3">
         <button onClick={() => setShowPreview(false)} className="btn-secondary flex-1">Edit Order</button>
-        <button onClick={() => navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.name || userData?.fullName || user.displayName } })} className="btn-primary flex-1">Proceed</button>
+        <button onClick={() => {
+          const validationError = validateOrder()
+          if (validationError) {
+            setOrderError(validationError)
+            setShowPreview(false)
+            return
+          }
+          setOrderError('')
+          navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.name || userData?.fullName || user.displayName } })
+        }} className="btn-primary flex-1">Proceed</button>
       </div>
     </div>
   )
@@ -525,7 +542,16 @@ export default function CreateOrder() {
       </div>
 
       <div className="p-4">
-        <button onClick={() => setShowPreview(true)} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
+        <button onClick={() => {
+          const validationError = validateOrder()
+          if (validationError) {
+            setOrderError(validationError)
+            return
+          }
+          setOrderError('')
+          setShowPreview(true)
+        }} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
+        {orderError && <p className="text-red-600 text-sm text-center mt-2">{orderError}</p>}
       </div>
     </div>
   )
