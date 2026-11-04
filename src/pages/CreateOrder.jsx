@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
 import { auth, db, ref, onValue, get, child } from '../services/firebase'
+import Spinner from '../components/Spinner'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
@@ -284,7 +285,7 @@ export default function CreateOrder() {
     }
   }, [availableDates])
 
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
 
   if (showPreview) return (

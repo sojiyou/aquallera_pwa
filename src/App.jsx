@@ -20,6 +20,7 @@ import EditProfile from './pages/EditProfile'
 import { ToastProvider } from './hooks/useToast'
 import ToastContainer from './components/ToastContainer'
 import NotificationListener from './components/NotificationListener'
+import Spinner from './components/Spinner'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -39,9 +40,9 @@ function ProtectedRoute({ children }) {
     return () => { cancelled = true }
   }, [user])
 
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-[3px] border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!user) return <Navigate to="/main" replace />
-  if (verified === null) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-[3px] border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  if (verified === null) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!verified) return <Navigate to="/verify-code" replace />
   return children
 }

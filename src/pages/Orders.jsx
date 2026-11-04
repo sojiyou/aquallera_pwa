@@ -5,6 +5,7 @@ import OrderTicketItem from '../components/OrderTicketItem'
 import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
 import { db, ref, onValue, update } from '../services/firebase'
+import Spinner from '../components/Spinner'
 
 const PAGE_SIZE = 5
 
@@ -175,7 +176,7 @@ export default function Orders() {
       )}
       <div className="flex-1 px-6 py-5 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+          <div className="flex items-center justify-center h-full"><Spinner /></div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <p className="text-lg font-bold text-midnight-blue mb-2">No Orders Yet</p>

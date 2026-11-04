@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { auth, onAuthStateChanged } from '../services/firebase'
+import Spinner from '../components/Spinner'
 
 export default function Splash() {
   const navigate = useNavigate()
@@ -25,7 +26,7 @@ export default function Splash() {
         &ldquo;Clean Water, Anytime, Anywhere.&rdquo;
       </p>
       <div className="mt-10">
-        <div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" />
+        <Spinner />
       </div>
     </div>
   )

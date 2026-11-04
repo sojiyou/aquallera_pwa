@@ -5,6 +5,7 @@ import { useToast } from '../hooks/useToast'
 import { auth, db, ref, get, set, update, child, remove, deleteUser, query, orderByChild, equalTo } from '../services/firebase'
 import { signOut, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth'
 import { sendVerificationCode } from '../services/emailjs'
+import Spinner from '../components/Spinner'
 
 export default function EditProfile() {
   const { user } = useAuth()
@@ -219,7 +220,7 @@ export default function EditProfile() {
     }
   }
 
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
 
   return (
     <div className="h-dvh bg-app-bg flex flex-col">
