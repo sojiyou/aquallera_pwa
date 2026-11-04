@@ -1,5 +1,10 @@
 import { to12Hour } from '../utils/formatTime'
 
+const toNumber = (value) => {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
+}
+
 export default function OrderReceipt({ order, revoked }) {
   const lineItems = [
     ...(order.pureWaterQty > 0 ? [{ name: 'Pure Water', qty: order.pureWaterQty, total: order.pureWaterTotal }] : []),
@@ -41,7 +46,7 @@ export default function OrderReceipt({ order, revoked }) {
           <div key={i} className="flex justify-between text-sm">
             <span className="flex-[2] text-gray-700">{item.name}</span>
             <span className="w-16 text-center text-gray-600">{item.qty}</span>
-            <span className="w-20 text-right text-gray-800 font-medium">₱{item.total.toFixed(2)}</span>
+            <span className="w-20 text-right text-gray-800 font-medium">₱{toNumber(item.total).toFixed(2)}</span>
           </div>
         ))}
       </div>
@@ -49,23 +54,23 @@ export default function OrderReceipt({ order, revoked }) {
       <div className="text-sm space-y-1.5 mb-4 pb-4 border-b border-dashed border-gray-300">
         <div className="flex justify-between">
           <span className="text-gray-500">Subtotal</span>
-          <span className="text-gray-700">₱{(order.waterSubtotal || order.water_subtotal || 0).toFixed(2)}</span>
+          <span className="text-gray-700">₱{toNumber(order.waterSubtotal ?? order.water_subtotal).toFixed(2)}</span>
         </div>
-        {(order.deliveryFee || order.delivery_fee) > 0 && (
+        {toNumber(order.deliveryFee ?? order.delivery_fee) > 0 && (
           <div className="flex justify-between">
             <span className="text-gray-500">Delivery Fee</span>
-            <span className="text-gray-700">₱{(order.deliveryFee || order.delivery_fee || 0).toFixed(2)}</span>
+            <span className="text-gray-700">₱{toNumber(order.deliveryFee ?? order.delivery_fee).toFixed(2)}</span>
           </div>
         )}
         <div className="flex justify-between">
           <span className="text-gray-500">Transaction Fee</span>
-          <span className="text-gray-700">₱{(order.transactionFee || order.transaction_fee || 5).toFixed(2)}</span>
+          <span className="text-gray-700">₱{toNumber(order.transactionFee ?? order.transaction_fee ?? 5).toFixed(2)}</span>
         </div>
       </div>
 
       <div className="flex justify-between text-base font-bold text-midnight-blue mb-4">
         <span>Total</span>
-        <span>₱{(order.grandTotal || order.grand_total || 0).toFixed(2)}</span>
+        <span>₱{toNumber(order.grandTotal ?? order.grand_total).toFixed(2)}</span>
       </div>
 
       <div className="text-xs text-gray-400 space-y-1 border-t border-dashed border-gray-200 pt-4">

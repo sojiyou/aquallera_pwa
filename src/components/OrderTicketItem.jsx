@@ -48,7 +48,7 @@ export default function OrderTicketItem({ order, revoked, onClick }) {
       <p className="text-midnight-blue text-xs">Date: {date}</p>
       <p className="text-midnight-blue text-xs">Ref #: {order.referenceNumber || 'N/A'}</p>
       <p className="text-midnight-blue text-xs">Items: {qty}</p>
-      <p className="text-midnight-blue text-base font-bold text-right mt-1">₱{(order.grandTotal || 0).toFixed(2)}</p>
+      <p className="text-midnight-blue text-base font-bold text-right mt-1">₱{(Number(order.grandTotal) || 0).toFixed(2)}</p>
     </div>
   )
 }
