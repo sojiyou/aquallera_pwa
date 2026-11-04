@@ -43,7 +43,7 @@ export default function CreateOrder() {
     if (!user) return
     get(child(ref(db), `users/${user.uid}`)).then((snapshot) => {
       if (snapshot.exists()) setUserData(snapshot.val())
-    })
+    }).catch(() => {})
   }, [user])
 
   const availableOrderTypes = station?.serviceTypes?.length

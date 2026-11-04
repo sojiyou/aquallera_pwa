@@ -79,6 +79,7 @@ export default function Orders() {
   }
 
   useEffect(() => {
+    if (!user) return
     const toCancel = orders.filter((o) => {
       const s = (o.status || '').toLowerCase()
       return isRevoked(o.stationId) && (s === 'pending' || s === 'confirmed')
@@ -88,9 +89,9 @@ export default function Orders() {
         status: 'cancelled',
         cancellationReason: 'Station no longer active',
         updatedAt: new Date().toISOString()
-      })
+      }).catch(() => {})
     })
-  }, [orders, stationStatuses])
+  }, [orders, stationStatuses, user])
 
   const handleCancelOrder = async (order) => {
     setCancellingId(order.firebaseKey)
@@ -100,9 +101,12 @@ export default function Orders() {
         updatedAt: new Date().toISOString()
       })
       setSelectedOrder({ ...order, status: 'cancelled', updatedAt: new Date().toISOString() })
-    } catch {}
-    setCancellingId(null)
-    setShowCancelModal(false)
+      setShowCancelModal(false)
+    } catch {
+      alert('Failed to cancel order. Please try again.')
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   const filteredOrders = filterStatus === 'all'

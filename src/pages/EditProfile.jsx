@@ -49,6 +49,9 @@ export default function EditProfile() {
         setOriginalEmail(email)
       }
       setLoading(false)
+    }).catch(() => {
+      setLoading(false)
+      addToast('Failed to load profile. Please try again.', 'error')
     })
   }, [user])
 

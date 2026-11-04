@@ -27,7 +27,7 @@ export default function VerifyCode() {
     const verifRef = ref(db, `emailVerification/${user.uid}/verified`)
     get(verifRef).then((snap) => {
       if (snap.val() === true) setShowPrivacy(true)
-    })
+    }).catch(() => {})
   }, [user])
 
   const startCooldown = () => {
