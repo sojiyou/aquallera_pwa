@@ -20,20 +20,29 @@ import EditProfile from './pages/EditProfile'
 import { ToastProvider } from './hooks/useToast'
 import ToastContainer from './components/ToastContainer'
 import NotificationListener from './components/NotificationListener'
+import Spinner from './components/Spinner'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   const [verified, setVerified] = useState(null)
 
   useEffect(() => {
+    setVerified(null)
     if (!user) return
-    get(ref(db, `emailVerification/${user.uid}/verified`)).then(snap => {
-      setVerified(snap.val() === true)
-    })
+    let cancelled = false
+    get(ref(db, `emailVerification/${user.uid}/verified`))
+      .then(snap => {
+        if (!cancelled) setVerified(snap.val() === true)
+      })
+      .catch(() => {
+        if (!cancelled) setVerified(false)
+      })
+    return () => { cancelled = true }
   }, [user])
 
-  if (loading || verified === null) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!user) return <Navigate to="/main" replace />
+  if (verified === null) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!verified) return <Navigate to="/verify-code" replace />
   return children
 }

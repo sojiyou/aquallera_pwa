@@ -5,6 +5,7 @@ import { auth, db, ref, get, set } from '../services/firebase'
 import { signOut } from 'firebase/auth'
 import { sendVerificationCode } from '../services/emailjs'
 import DataPrivacyDialog from '../components/DataPrivacyDialog'
+import Spinner from '../components/Spinner'
 
 export default function VerifyCode() {
   const { user, loading } = useAuth()
@@ -26,7 +27,7 @@ export default function VerifyCode() {
     const verifRef = ref(db, `emailVerification/${user.uid}/verified`)
     get(verifRef).then((snap) => {
       if (snap.val() === true) setShowPrivacy(true)
-    })
+    }).catch(() => {})
   }, [user])
 
   const startCooldown = () => {
@@ -84,7 +85,7 @@ export default function VerifyCode() {
     }
   }
 
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><div className="w-8 h-8 border-3 border-midnight-blue border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!user) return null
 
   return (

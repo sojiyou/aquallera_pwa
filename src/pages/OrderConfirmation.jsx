@@ -33,14 +33,17 @@ export default function OrderConfirmation() {
 
       await set(ref(db, `orders/${orderId}`), finalOrder)
 
-      await sendOrderConfirmationEmail(
-        state?.userEmail || orderData.userEmail || '',
-        state?.userName || orderData.customerName || 'Customer',
-        orderId,
-        orderData.grandTotal,
-        orderData.date || orderData.createdAt,
-        orderData.stationName
-      ).catch(() => {})
+      await sendOrderConfirmationEmail({
+        email: state?.userEmail || orderData.userEmail || '',
+        customerName: state?.userName || orderData.customerName || 'Customer',
+        stationName: orderData.stationName,
+        orderType: orderData.orderType,
+        date: orderData.date || orderData.createdAt,
+        time: orderData.time,
+        referenceNumber: orderId,
+        grandTotal: orderData.grandTotal,
+        status: finalOrder.status,
+      }).catch(() => {})
 
       navigate('/order-success', {
         state: {

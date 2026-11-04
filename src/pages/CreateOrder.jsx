@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { to12Hour } from '../utils/formatTime'
 import { auth, db, ref, onValue, get, child } from '../services/firebase'
+import Spinner from '../components/Spinner'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
@@ -23,6 +24,7 @@ export default function CreateOrder() {
   const [preferredDate, setPreferredDate] = useState(today)
   const [preferredTime, setPreferredTime] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [orderError, setOrderError] = useState('')
   const [addressSearch, setAddressSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
@@ -42,7 +44,7 @@ export default function CreateOrder() {
     if (!user) return
     get(child(ref(db), `users/${user.uid}`)).then((snapshot) => {
       if (snapshot.exists()) setUserData(snapshot.val())
-    })
+    }).catch(() => {})
   }, [user])
 
   const availableOrderTypes = station?.serviceTypes?.length
@@ -68,11 +70,18 @@ export default function CreateOrder() {
     { key: 'spring', label: 'Spring', unit: 'Gallon' },
     { key: 'mineral', label: 'Mineral', unit: 'Gallon' },
   ].filter(t => (station?.waterTypes?.length ? station.waterTypes : ['pure', 'spring', 'mineral']).includes(t.key))
-  const deliveryFee = station?.pricing_delivery_fee || 50
+  const deliveryFee = Number(station?.pricing_delivery_fee ?? 50) || 0
   const subtotal = Object.entries(prices).reduce((sum, [type, price]) => sum + (price * (quantities[type] || 0)), 0)
   const transactionFee = parseFloat(((subtotal + (orderType === 'Delivery' ? deliveryFee : 0)) * 0.02).toFixed(2))
   const grandTotal = subtotal + (orderType === 'Delivery' ? deliveryFee : 0) + transactionFee
   const hasItems = Object.values(quantities).some(q => q > 0)
+  const validateOrder = () => {
+    if (!hasItems) return 'Please select at least one water type.'
+    if (orderType === 'Delivery' && !userAddress.trim()) return 'Please enter your delivery address.'
+    if (orderType === 'Delivery' && station?.deliveryHours?.length > 0 && !preferredTime) return 'Please select a delivery time.'
+    if (orderType === 'Pickup' && !preferredTime) return 'Please select a pickup time.'
+    return ''
+  }
   const buildOrderData = () => ({
     customerId: user.uid,
     userId: user.uid,
@@ -284,8 +293,14 @@ export default function CreateOrder() {
     }
   }, [availableDates])
 
-  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+  if (loading) return <div className="h-dvh flex items-center justify-center bg-app-bg"><Spinner /></div>
   if (!station) return <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4"><p className="text-midnight-blue font-bold">Station not found</p><button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button></div>
+  if (station.status && station.status !== 'approved') return (
+    <div className="h-dvh flex flex-col items-center justify-center bg-app-bg gap-4 px-6 text-center">
+      <p className="text-midnight-blue font-bold">This station is not accepting orders right now.</p>
+      <button onClick={() => navigate('/maps')} className="btn-primary">Back to Map</button>
+    </div>
+  )
 
   if (showPreview) return (
     <div className="h-dvh bg-app-bg flex flex-col">
@@ -321,7 +336,16 @@ export default function CreateOrder() {
       </div>
       <div className="p-4 flex gap-3">
         <button onClick={() => setShowPreview(false)} className="btn-secondary flex-1">Edit Order</button>
-        <button onClick={() => navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.name || userData?.fullName || user.displayName } })} className="btn-primary flex-1">Proceed</button>
+        <button onClick={() => {
+          const validationError = validateOrder()
+          if (validationError) {
+            setOrderError(validationError)
+            setShowPreview(false)
+            return
+          }
+          setOrderError('')
+          navigate('/order-confirmation', { state: { orderData: buildOrderData(), userEmail: user.email, userName: userData?.name || userData?.fullName || user.displayName } })
+        }} className="btn-primary flex-1">Proceed</button>
       </div>
     </div>
   )
@@ -524,7 +548,16 @@ export default function CreateOrder() {
       </div>
 
       <div className="p-4">
-        <button onClick={() => setShowPreview(true)} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
+        <button onClick={() => {
+          const validationError = validateOrder()
+          if (validationError) {
+            setOrderError(validationError)
+            return
+          }
+          setOrderError('')
+          setShowPreview(true)
+        }} className="btn-primary w-full" disabled={!hasItems}>Preview Order</button>
+        {orderError && <p className="text-red-600 text-sm text-center mt-2">{orderError}</p>}
       </div>
     </div>
   )

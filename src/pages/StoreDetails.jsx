@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { db, ref, onValue } from '../services/firebase'
 import { to12Hour } from '../utils/formatTime'
+import Spinner from '../components/Spinner'
 
 const DOC_NAMES = {
   businessPermit: 'BP',
@@ -27,7 +28,7 @@ export default function StoreDetails() {
 
   if (loading) return (
     <div className="h-dvh flex items-center justify-center bg-app-bg">
-      <span className="loading loading-spinner loading-lg text-midnight-blue"></span>
+      <Spinner />
     </div>
   )
 
@@ -121,7 +122,7 @@ export default function StoreDetails() {
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">Offered Services</h2>
-          {(station.serviceTypes && station.serviceTypes.length) > 0 ? (
+          {(station.serviceTypes?.length > 0) ? (
             <>
               <p className="text-xs text-gray-500 mb-2">
                 {station.serviceTypes.includes('delivery') && station.serviceTypes.includes('pickup')

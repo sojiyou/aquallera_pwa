@@ -5,6 +5,7 @@ import OrderTicketItem from '../components/OrderTicketItem'
 import OrderReceipt from '../components/OrderReceipt'
 import { useAuth } from '../hooks/useAuth'
 import { db, ref, onValue, update } from '../services/firebase'
+import Spinner from '../components/Spinner'
 
 const PAGE_SIZE = 5
 
@@ -59,7 +60,7 @@ export default function Orders() {
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
           const o = child.val()
-          if (o.userId === user.uid) {
+          if (o.userId === user.uid || o.customerId === user.uid) {
             list.push({ firebaseKey: child.key, ...o })
           }
         })
@@ -78,6 +79,7 @@ export default function Orders() {
   }
 
   useEffect(() => {
+    if (!user) return
     const toCancel = orders.filter((o) => {
       const s = (o.status || '').toLowerCase()
       return isRevoked(o.stationId) && (s === 'pending' || s === 'confirmed')
@@ -87,9 +89,9 @@ export default function Orders() {
         status: 'cancelled',
         cancellationReason: 'Station no longer active',
         updatedAt: new Date().toISOString()
-      })
+      }).catch(() => {})
     })
-  }, [orders, stationStatuses])
+  }, [orders, stationStatuses, user])
 
   const handleCancelOrder = async (order) => {
     setCancellingId(order.firebaseKey)
@@ -99,9 +101,12 @@ export default function Orders() {
         updatedAt: new Date().toISOString()
       })
       setSelectedOrder({ ...order, status: 'cancelled', updatedAt: new Date().toISOString() })
-    } catch {}
-    setCancellingId(null)
-    setShowCancelModal(false)
+      setShowCancelModal(false)
+    } catch {
+      alert('Failed to cancel order. Please try again.')
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   const filteredOrders = filterStatus === 'all'
@@ -175,7 +180,7 @@ export default function Orders() {
       )}
       <div className="flex-1 px-6 py-5 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg text-midnight-blue"></span></div>
+          <div className="flex items-center justify-center h-full"><Spinner /></div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <p className="text-lg font-bold text-midnight-blue mb-2">No Orders Yet</p>

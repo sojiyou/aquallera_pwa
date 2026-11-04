@@ -9,7 +9,7 @@ A Progressive Web App for Baguio City residents to locate nearby water refilling
 - **Order Creation** — Multi-water-type ordering (Pure/Gallon, Spring/Liter, Mineral/Gallon) with independent +/- counters; Delivery or Pickup options; address autocomplete; available date selection based on station delivery days.
 - **Order Management** — Orders list with status filter tabs, receipt-style detail view, cancel option, and revoked order handling.
 - **Email Notifications** — Order confirmation emails via EmailJS using the same service as the Android app.
-- **Email Verification** — Full-page blocker with auto-polling every 5s; verified-only access to all protected routes.
+- **Email Verification** — Full-page 6-digit OTP blocker with resend; verified-only access to all protected routes.
 - **User Profile** — Avatar, account details, email verification status, edit name/email/phone, report bug button.
 
 ## Tech Stack
@@ -39,7 +39,7 @@ Preview the production build locally.
 
 Configured via `vercel.json`. Framework auto-detected as Vite; builds to `dist/`; all routes rewrite to `/index.html` for React Router SPA support. Node `>=18` required (set via `engines` in `package.json`).
 
-Set all `VITE_*` and `REACT_APP_*` environment variables in the Vercel dashboard (Firebase config, EmailJS credentials, Mapbox token).
+Set all `VITE_*` environment variables in the Vercel dashboard. Required keys are listed in `.env.example` (Firebase config, EmailJS order + OTP credentials, Mapbox token). Vite only exposes variables prefixed with `VITE_`.
 
 ## Mobile Responsiveness
 
@@ -116,4 +116,4 @@ Currently only **Cash on Delivery** is supported.
 
 1. **Firebase rules** — Add `.indexOn: ["number", "email"]` to `users` and `.indexOn: "email"` to `waterStations` for signup duplicate checks
 2. **Offline support** — Service worker precaches assets but no offline fallback pages are implemented
-3. **Env vars** — Placeholder values in `.env` need to be replaced with real keys before deployment
+3. **Env vars** — Copy `.env.example` to `.env` and set every key. `VITE_MAPBOX_TOKEN`, `VITE_EMAILJS_SERVICE_ID`, and `VITE_EMAILJS_TEMPLATE_ID` are currently missing from the local `.env`, which disables the map and order-confirmation emails until configured in Vercel.

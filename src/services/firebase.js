@@ -35,7 +35,6 @@ function generateReferenceNumber(stationName) {
       const padded = String(count).padStart(4, '0')
       return `${prefix}-${dateStr}-${padded}`
     })
-    .catch(() => `${prefix}-${dateStr}-0000`)
 }
 
 export {
