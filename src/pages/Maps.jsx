@@ -18,6 +18,15 @@ const MAX_ZOOM = 18
 
 const SNAP_POINTS = [15, 55, 85]
 
+const escapeHtml = (value) =>
+  String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]))
+
 export default function Maps() {
   const navigate = useNavigate()
   const mapContainer = useRef(null)
@@ -200,7 +209,7 @@ export default function Maps() {
 
       const marker = new mapboxgl.Marker({ element: wrapper })
         .setLngLat([s.longitude, s.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${s.stationName}</strong><br/>${s.address || ''}`))
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>${escapeHtml(s.stationName)}</strong><br/>${escapeHtml(s.address)}`))
         .addTo(map.current)
       wrapper.addEventListener('click', () => {
         setSelectedStation(s)
