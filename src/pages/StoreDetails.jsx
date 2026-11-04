@@ -122,7 +122,7 @@ export default function StoreDetails() {
 
         <div className="card">
           <h2 className="font-bold text-midnight-blue mb-2">Offered Services</h2>
-          {(station.serviceTypes && station.serviceTypes.length) > 0 ? (
+          {(station.serviceTypes?.length > 0) ? (
             <>
               <p className="text-xs text-gray-500 mb-2">
                 {station.serviceTypes.includes('delivery') && station.serviceTypes.includes('pickup')

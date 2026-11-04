@@ -7,16 +7,16 @@ export default function Splash() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    let unsubscribe
     const timer = setTimeout(() => {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          navigate('/maps', { replace: true })
-        } else {
-          navigate('/main', { replace: true })
-        }
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        navigate(user ? '/maps' : '/main', { replace: true })
       })
     }, 1500)
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      unsubscribe?.()
+    }
   }, [navigate])
 
   return (

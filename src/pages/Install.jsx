@@ -12,11 +12,11 @@ export default function Install() {
       setDeferredPrompt(e)
     }
     window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', () => {
-      navigate('/main', { replace: true })
-    })
+    const handleInstalled = () => navigate('/main', { replace: true })
+    window.addEventListener('appinstalled', handleInstalled)
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', handleInstalled)
     }
   }, [navigate])
 
@@ -25,7 +25,7 @@ export default function Install() {
     try {
       deferredPrompt.prompt()
       await deferredPrompt.userChoice
-    } catch (e) {
+    } catch {
       // Event already consumed, ignore
     }
   }

@@ -58,7 +58,7 @@ export default function Profile() {
     try {
       await signOut(auth)
       navigate('/login')
-    } catch (e) {
+    } catch {
       alert('Failed to log out')
     }
   }
