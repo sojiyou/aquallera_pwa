@@ -55,7 +55,7 @@ export default function Maps() {
   useEffect(() => {
     const handleResize = () => map.current?.resize()
     let observer
-    if (!map.current && mapContainer.current) {
+    if (!map.current && mapContainer.current && MAPBOX_TOKEN) {
       mapboxgl.accessToken = MAPBOX_TOKEN
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
@@ -346,6 +346,11 @@ export default function Maps() {
 
       <div ref={containerRef} className="flex-1 relative overflow-hidden">
         <div ref={mapContainer} className="absolute inset-0 bg-gray-300 overflow-hidden" />
+        {!MAPBOX_TOKEN && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 p-6 text-center">
+            <p className="text-midnight-blue font-medium text-sm">Map unavailable: the Mapbox token is not configured.</p>
+          </div>
+        )}
 
         <button
           onClick={requestUserLocation}
