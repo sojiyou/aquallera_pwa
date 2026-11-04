@@ -60,7 +60,7 @@ export default function Orders() {
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
           const o = child.val()
-          if (o.userId === user.uid) {
+          if (o.userId === user.uid || o.customerId === user.uid) {
             list.push({ firebaseKey: child.key, ...o })
           }
         })
